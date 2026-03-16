@@ -1,0 +1,9 @@
+.env
+*.sql
+CLEAN_CODE_*.md
+CSS_*.md
+PJU_*.md
+START_HERE*
+*.webp
+*.txt
+vendor/

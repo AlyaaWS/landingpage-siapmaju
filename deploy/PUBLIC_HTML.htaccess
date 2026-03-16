@@ -1,0 +1,37 @@
+# ============================================================
+#  PRODUCTION .htaccess  →  upload THIS as public_html/.htaccess
+#  (rename to .htaccess, replacing the local-dev file)
+# ============================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Serve real files and directories directly (CSS, JS, images, fonts, etc.)
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Route everything else through index.php (MVC front-controller)
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# ── Security hardening ────────────────────────────────────────────────────────
+
+# Prevent directory listing
+Options -Indexes
+
+# Block access to hidden files (e.g. .env, .git) except this .htaccess
+<FilesMatch "^\.(?!htaccess)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Prevent direct execution of PHP files in the uploads folder (if you have one)
+# <Directory "img">
+#     php_flag engine off
+# </Directory>
