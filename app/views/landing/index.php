@@ -51,7 +51,7 @@
 			<div class="col-lg-6 text-center text-md-start">
 				<h1 class="display-5 display-md-3 fw-bold mb-3">SIAP MAJU</h1>
 				<p class="lead text-white-75 mb-4">Portal resmi aduan PJU Dishub Sleman. Laporkan tiang atau lampu jalan rusak di lingkungan Anda dengan mudah dan pantau statusnya.</p>
-				<a href="#alur" class="btn btn-primary px-4">Scan Barcode Sekarang</a>
+				<a href="<?= base_url('scan') ?>" class="btn btn-primary px-4">Scan Barcode Sekarang</a>
 			</div>
 		</div>
 	</div>

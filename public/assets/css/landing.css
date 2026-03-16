@@ -306,3 +306,10 @@ canvas {
     margin-bottom: 0.35rem;
   }
 }
+
+/* Nudge footer contact block slightly down on desktop so it aligns with media column */
+@media (min-width: 768px) {
+  .footer-top .col-md-7 {
+    margin-top: 0.45rem;
+  }
+}

@@ -13,4 +13,17 @@ class LandingController extends Controller {
         ]);
         
     }
+
+    /**
+     * Scan page - opens camera and shows scanner UI
+     */
+    public function scan()
+    {
+        $this->view('landing/scan', [
+            '_layout' => false,
+            'judul'   => 'Scan Barcode - SIAP MAJU',
+            'styles'  => ['css/landing.css'],
+            'scripts' => []
+        ]);
+    }
 }
