@@ -22,6 +22,18 @@ body {
   /* follow navbar's default text color */
   color: inherit;
 }
+.navbar-brand .logo-img {
+  height: 28px;
+  width: auto;
+}
+@media (min-width: 768px) {
+  .navbar-brand .logo-img {
+    height: 36px;
+  }
+  .hero-section .btn {
+    padding: 0.6rem 1.25rem;
+  }
+}
 .nav-link {
   font-weight: 500;
   margin-left: 12px;
@@ -39,13 +51,13 @@ body {
   padding: 3.5rem 0;
   display: flex;
   align-items: center;
-  margin-top: -46px;
+  margin-top: -58px;
 }
 .hero-section h1 {
   font-weight: 700;
   margin-bottom: 0.5rem;
   line-height: 1.05;
-  font-size: 2rem; /* slightly reduced */
+  font-size: 2rem; /* desktop size restored */
 }
 .hero-section p {
   max-width: 640px;
@@ -63,6 +75,11 @@ body {
   border-color: #0e145a;
 }
 
+/* Hero CTA sizing */
+.hero-section .btn {
+  padding: 0.5rem 1rem;
+}
+
 /* SECTIONS */
 section {
   padding: 3rem 0;
@@ -78,7 +95,7 @@ section {
 /* ALUR CARD */
 .card-alur {
   background: white;
-  padding: 1.25rem;
+  padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
   transition:
@@ -133,11 +150,17 @@ section {
 }
 /* card head grouping */
 .card-head {
-  min-height: 96px;
+  min-height: 88px;
 }
 /* description justification and spacing */
 .card-desc {
   text-align: center;
+}
+
+/* Reduce spacing between alur cards and make gutters consistent */
+#alur .row {
+  --bs-gutter-x: 0.75rem;
+  --bs-gutter-y: 0.75rem;
 }
 
 /* STAT */
@@ -154,13 +177,21 @@ section {
 }
 .card-stat {
   background: white;
-  padding: 1.25rem;
+  padding: 1rem;
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .card-stat h6 {
   color: var(--muted);
   font-weight: 600;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .card-stat h2 {
   font-size: 1.5rem;
@@ -175,6 +206,13 @@ section {
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
 }
+
+/* Ensure the stat cards use the same grid gutters as the chart row
+   so horizontal/vertical spacing between cards appears consistent */
+.section-gray .row {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 1.5rem;
+}
 canvas {
   max-height: 260px;
   width: 100% !important;
@@ -186,17 +224,16 @@ canvas {
   gap: 0.5rem;
   background: transparent;
   border-radius: 8px;
-  height: 45px;
-  margin-bottom: 30px;
+  margin-bottom: 1rem;
 }
 .cek-box .form-control {
   border-radius: 10px;
-  padding: 0.55rem 0.75rem; /* smaller input height */
+  padding: 0.45rem 0.65rem; /* slightly smaller input height */
 }
 .cek-box .btn {
   border-radius: 10px;
-  padding: 0.5rem 0.85rem;
-  width: 180px;
+  padding: 0.45rem 0.85rem;
+  width: 10px;
 }
 
 /* FOOTER */
@@ -226,6 +263,7 @@ canvas {
     padding-top: 2rem;
     padding-bottom: 2rem;
     min-height: 50vh;
+    margin-top: -65px;
   }
   .section-gray .section-title {
     margin-top: -12px;
@@ -234,7 +272,13 @@ canvas {
     margin-top: -18px;
   }
   .hero-section h1 {
-    font-size: 1.75rem;
+    font-size: 1.25rem; /* smaller on mobile only */
+  }
+  .hero-section p {
+    font-size: 0.95rem; /* paragraph smaller on mobile */
+  }
+  section {
+    padding: 1rem 0;
   }
   .section-title {
     font-size: 1.25rem;
@@ -248,5 +292,17 @@ canvas {
   }
   .cek-box .btn {
     width: 100%;
+  }
+  /* Make placeholder smaller on mobile so it doesn't wrap/cut visually */
+  .cek-box .form-control::placeholder {
+    font-size: 0.85rem;
+  }
+
+  /* Tighten footer contact spacing on mobile */
+  .footer-top .col-md-7 h5 {
+    margin-bottom: 0.25rem;
+  }
+  .footer-top .col-md-7 p {
+    margin-bottom: 0.35rem;
   }
 }
