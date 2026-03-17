@@ -122,7 +122,7 @@
 			<div class="col-md-4 mb-3 mb-md-0">
 				<div class="card-stat h-100 d-flex flex-column justify-content-center text-center p-4">
 					<h6 class="text-muted mb-2">Total Laporan</h6>
-					<h2 class="display-6 mb-1">1500</h2>
+					<h2 class="display-6 mb-1"><?= htmlspecialchars($totalLaporan ?? 0) ?></h2>
 					<p class="small text-muted">Tahun Ini</p>
 				</div>
 			</div>
@@ -130,15 +130,15 @@
 			<div class="col-md-4 mb-3 mb-md-0">
 				<div class="card-stat h-100 d-flex flex-column justify-content-center text-center p-4">
 					<h6 class="text-muted mb-2">Sedang Diperbaiki</h6>
-					<h2 class="display-6 mb-1">75</h2>
+					<h2 class="display-6 mb-1"><?= htmlspecialchars($sedangDiperbaiki ?? 0) ?></h2>
 				</div>
 			</div>
 
 			<div class="col-md-4 mb-3 mb-md-0">
 				<div class="card-stat h-100 d-flex flex-column justify-content-center text-center p-4">
 					<h6 class="text-muted mb-2">Berhasil Diperbaiki</h6>
-					<h2 class="display-6 mb-1">1500</h2>
-					<p class="small text-muted">20% Sukses</p>
+					<h2 class="display-6 mb-1"><?= htmlspecialchars($berhasilDiperbaiki ?? 0) ?></h2>
+					<p class="small text-muted"><?= htmlspecialchars($persenSukses ?? 0) ?>% Sukses</p>
 				</div>
 			</div>
 		</div>
@@ -247,7 +247,19 @@ Copyright © 2024 Dinas Perhubungan Kabupaten Sleman.
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Pass PHP data to global JS object safely using the exact variables returned by DashboardModel
+    window.__DASHBOARD_DATA__ = {
+        summary: {
+            total_lpju: <?= $totalLaporan ?? 0 ?>,
+            total_daya: <?= $barData[1] ?? 0 ?> 
+        },
+        doughnutLabels: <?= json_encode($doughnutLabels ?? []) ?>,
+        doughnutData: <?= json_encode($doughnutData ?? []) ?>,
+        pieLabels: <?= json_encode($pieLabels ?? []) ?>,
+        pieData: <?= json_encode($pieData ?? []) ?>
+    };
+</script>
 
 <script src="<?= base_url('assets/js/landing.js') ?>"></script>
 

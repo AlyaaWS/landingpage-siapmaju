@@ -79,6 +79,16 @@
 
       <div id="reader"></div>
 
+      <!-- File upload fallback when camera fails -->
+      <div id="upload-fallback" class="text-center mt-3" style="display:none;">
+        <p class="text-muted small mb-2">Kamera tidak tersedia? Upload foto QR code dari galeri:</p>
+        <label for="qr-input-file" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-image me-1"></i> Upload Gambar QR
+        </label>
+        <input type="file" id="qr-input-file" accept="image/*" capture="environment" style="display:none;">
+        <div id="upload-result" class="mt-2"></div>
+      </div>
+
       <div class="d-flex justify-content-between align-items-center mt-3">
         <div class="text-muted small">Pastikan beri izin akses kamera. Hanya berfungsi di localhost atau HTTPS.</div>
         <div>
@@ -91,8 +101,13 @@
 
 <footer class="mt-4"></footer>
 
-<!-- libs -->
+<!-- libs: primary CDN + fallback if primary fails -->
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
+<script>
+  if (typeof Html5Qrcode === 'undefined') {
+    document.write('<script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js"><\/script>');
+  }
+</script>
 <script src="<?= base_url('assets/js/scan.js') ?>"></script>
 
 </body>
