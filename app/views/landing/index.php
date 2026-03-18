@@ -14,6 +14,17 @@
 
 <link rel="stylesheet" href="<?= base_url('assets/css/landing.css') ?>">
 
+<style>
+/* small smooth animation for modal appearance */
+.modal.fade .modal-dialog{
+	transform: translateY(-10px);
+	transition: transform .18s ease-out, opacity .18s ease-out;
+}
+.modal.show .modal-dialog{
+	transform: translateY(0);
+}
+</style>
+
 </head>
 <body>
 
@@ -178,9 +189,10 @@
 				<form class="cek-box">
 					<!-- Responsive input-group: stacked on small screens, inline on md+ -->
 					<div class="input-group flex-column flex-md-row flex-md-nowrap align-items-center w-100">
-						<input type="text" class="form-control rounded-3 mb-2 mb-md-0 me-md-2 w-100 flex-grow-1" placeholder="Masukan nomer tiket atau no whatsapp anda ..." aria-label="Nomor tiket atau WhatsApp">
-						<button type="submit" class="btn btn-primary rounded-3 w-auto text-nowrap">Cek Status</button>
+						<input id="nomor_tiket" name="nomor_tiket" type="text" class="form-control rounded-3 mb-2 mb-md-0 me-md-2 w-100 flex-grow-1" placeholder="Masukan nomer tiket anda ..." aria-label="Nomor tiket atau WhatsApp">
+						<button id="btn_cek_status" type="submit" class="btn btn-primary rounded-3 w-auto text-nowrap">Cek Status</button>
 					</div>
+					<div id="hasil_status" class="mt-3"></div>
 				</form>
 			</div>
 		</div>
@@ -244,6 +256,21 @@ Copyright © 2024 Dinas Perhubungan Kabupaten Sleman.
 
 </footer>
 
+<!-- Modal untuk menampilkan hasil cek status -->
+<div id="modal_hasil_status" class="modal fade" tabindex="-1" aria-labelledby="modalHasilLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalHasilLabel">Hasil Cek Status</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="modal_hasil_status_body"></div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -259,6 +286,110 @@ Copyright © 2024 Dinas Perhubungan Kabupaten Sleman.
         pieLabels: <?= json_encode($pieLabels ?? []) ?>,
         pieData: <?= json_encode($pieData ?? []) ?>
     };
+</script>
+
+<script>
+// Cek status laporan menggunakan Fetch API — tampilkan hasil di modal Bootstrap
+(function(){
+	const form = document.querySelector('form.cek-box');
+	const input = document.getElementById('nomor_tiket');
+	const hasilEl = document.getElementById('hasil_status'); // fallback if modal not available
+	const modalEl = document.getElementById('modal_hasil_status');
+	const modalBody = document.getElementById('modal_hasil_status_body');
+	const bsModal = (typeof bootstrap !== 'undefined' && modalEl) ? new bootstrap.Modal(modalEl) : null;
+
+	function escapeHTML(s){
+		return String(s || '')
+			.replace(/&/g,'&amp;')
+			.replace(/</g,'&lt;')
+			.replace(/>/g,'&gt;')
+			.replace(/"/g,'&quot;')
+			.replace(/'/g,'&#39;');
+	}
+
+	function statusBadgeColored(status){
+		const raw = String(status || '').trim();
+		const key = raw.toLowerCase();
+		let cls = 'bg-secondary';
+		let label = raw || '-';
+
+		if(!raw) {
+			cls = 'bg-secondary';
+		} else if(key.includes('belum') || key.includes('pending')){
+			cls = 'bg-secondary';
+		} else if(key.includes('selesai') || key.includes('sukses') || key.includes('success') || key.includes('done')){
+			cls = 'bg-success';
+		} else if(key.includes('gagal') || key.includes('fail') || key.includes('failed')){
+			cls = 'bg-danger';
+		} else {
+			cls = 'bg-secondary';
+		}
+
+		return `<span class="badge ${cls} text-white">${escapeHTML(label)}</span>`;
+	}
+
+	function showInModal(html){
+		if(modalBody && bsModal){
+			modalBody.innerHTML = html;
+			try{ bsModal.show(); }catch(e){ console.warn(e); if(hasilEl) hasilEl.innerHTML = html; }
+		} else if(hasilEl){
+			// fallback: render inline
+			hasilEl.innerHTML = html;
+		}
+	}
+
+	async function cekStatus(){
+		const nomor = (input.value || '').trim();
+		if(!nomor){
+			const warn = '<div class="alert alert-warning mb-0">Nomor tiket harus diisi</div>';
+			showInModal(warn);
+			return;
+		}
+
+		showInModal('<div class="text-muted">Memeriksa status...</div>');
+
+		const url = '/siap-maju/public/api/cek-status?nomor_tiket=' + encodeURIComponent(nomor);
+
+		try{
+			const resp = await fetch(url, { method: 'GET', cache: 'no-store' });
+			if(!resp.ok) throw new Error('HTTP ' + resp.status);
+			const data = await resp.json();
+
+			if(data && data.status){
+				const d = data.data || {};
+				const html = `
+					<div class="card">
+					  <div class="card-body">
+						<div class="d-flex justify-content-between align-items-start mb-2">
+						  <div><strong>No. Tiket:</strong> ${escapeHTML(d.nomor_tiket || nomor)}</div>
+						  ${statusBadgeColored(d.status_perbaikan)}
+						</div>
+						<div><strong>Lokasi:</strong> ${escapeHTML(d.lokasi || '-')}</div>
+						<div><strong>Tanggal:</strong> ${escapeHTML(d.tanggal || '-')}</div>
+					  </div>
+					</div>
+				`;
+				showInModal(html);
+			} else {
+				const msg = (data && data.message) ? escapeHTML(data.message) : 'Data tidak ditemukan.';
+				showInModal('<div class="alert alert-danger mb-0">'+ msg +'</div>');
+			}
+
+		} catch(err){
+			showInModal('<div class="alert alert-danger mb-0">Terjadi kesalahan: '+ escapeHTML(err.message || String(err)) +'</div>');
+			console.error('cekStatus error:', err);
+		}
+	}
+
+	if(form){
+		form.addEventListener('submit', function(e){
+			e.preventDefault();
+			cekStatus();
+		});
+	}
+
+	window.cekStatus = cekStatus;
+})();
 </script>
 
 <script src="<?= base_url('assets/js/landing.js') ?>"></script>
