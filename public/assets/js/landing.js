@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // DOUGHNUT CHARTS WILL NOW RENDER
         const dayaCanvas = document.getElementById("chartDoughnut");
         if (dayaCanvas) {
-            const dayaResult = drawPie(dayaCanvas, countByDaya, totalLpju, true, false);
+            const dayaResult = drawPie(dayaCanvas, countByDaya, totalLpju, false, false);
             if (dayaResult) attachPieTooltip(dayaCanvas, dayaResult.slices, dayaResult.cx, dayaResult.cy, dayaResult.innerR, dayaResult.outerR);
         }
 
@@ -284,3 +284,116 @@ document.addEventListener("DOMContentLoaded", function() {
     renderDashboardCharts();
     window.addEventListener("resize", renderDashboardCharts);
 });
+
+// ── Cek Status Laporan (Fetch API) ───────────────────────────────────────
+(function(){
+    const form = document.querySelector('form.cek-box');
+    const input = document.getElementById('nomor_tiket');
+    const hasilEl = document.getElementById('hasil_status'); 
+    const modalEl = document.getElementById('modal_hasil_status');
+    const modalBody = document.getElementById('modal_hasil_status_body');
+    const bsModal = (typeof bootstrap !== 'undefined' && modalEl) ? new bootstrap.Modal(modalEl) : null;
+
+    function escapeHTML(s){
+        return String(s || '')
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+    }
+
+    function statusBadgeColored(status){
+        const raw = String(status || '').trim();
+        const key = raw.toLowerCase();
+        let cls = 'bg-secondary'; // Default: grey
+        let label = raw || '-';
+
+        if(!raw) {
+            cls = 'bg-secondary';
+        } else if(key.includes('gagal') || key.includes('fail') || key.includes('failed') || key.includes('tidak sukses')){
+            // FIXED: Check for negative/failure keywords FIRST to prevent false positives
+            cls = 'bg-danger';
+        } else if(key.includes('selesai') || key.includes('sukses') || key.includes('success') || key.includes('done')){
+            // Now it is safe to check for "sukses" because "tidak sukses" has been filtered out
+            cls = 'bg-success';
+        } else if(key.includes('sedang diperbaiki') || key.includes('in progress') || key.includes('pending') || key.includes('belum dikerjakan')){
+            cls = 'bg-primary'; 
+        } else {
+            cls = 'bg-secondary';
+        }
+
+        return `<span class="badge ${cls} text-white">${escapeHTML(label)}</span>`;
+    }
+
+    function showInModal(html){
+        if(modalBody && bsModal){
+            modalBody.innerHTML = html;
+            try{ bsModal.show(); }catch(e){ console.warn(e); if(hasilEl) hasilEl.innerHTML = html; }
+        } else if(hasilEl){
+            hasilEl.innerHTML = html;
+        }
+    }
+
+    async function cekStatus(){
+        const nomor = (input.value || '').trim();
+        if(!nomor){
+            showInModal('<div class="alert alert-warning mb-0">Nomor tiket harus diisi</div>');
+            return;
+        }
+
+        showInModal('<div class="text-muted">Memeriksa status...</div>');
+
+        // FIXED: Dynamic Environment Checker for Cross-Project API Routing
+        let apiBaseUrl = "";
+        const currentHost = window.location.hostname;
+
+        // Check if running locally (localhost, local IP, or ngrok)
+        if (currentHost === "localhost" || currentHost === "127.0.0.1" || currentHost.startsWith("192.168") || currentHost.includes("ngrok-free.app")) {
+            // Route to the local Admin project
+            apiBaseUrl = window.location.origin + "/lpju-sleman-test/public/api/cek-status";
+        } else {
+            // Route to the Production Admin Domain
+            apiBaseUrl = "https://adminpju.dishubsleman.id/api/cek-status";
+        }
+        
+        const url = apiBaseUrl + '?nomor_tiket=' + encodeURIComponent(nomor);
+
+        try{
+            const resp = await fetch(url, { method: 'GET', cache: 'no-store' });
+            if(!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+
+            if(data && data.status){
+                const d = data.data || {};
+                const html = `
+                    <div class="card border-0 shadow-sm">
+                      <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3 border-bottom pb-2">
+                          <h6 class="mb-0 fw-bold">No. Tiket: <span class="text-primary">${escapeHTML(d.nomor_tiket || nomor)}</span></h6>
+                          ${statusBadgeColored(d.status_perbaikan)}
+                        </div>
+                        <div class="mb-2"><i class="fa-solid fa-location-dot text-muted me-2"></i> ${escapeHTML(d.lokasi || '-')}</div>
+                        <div><i class="fa-solid fa-calendar-alt text-muted me-2"></i> ${escapeHTML(d.tanggal || '-')}</div>
+                      </div>
+                    </div>
+                `;
+                showInModal(html);
+            } else {
+                const msg = (data && data.message) ? escapeHTML(data.message) : 'Data tidak ditemukan.';
+                showInModal('<div class="alert alert-danger mb-0"><i class="fa-solid fa-circle-exclamation me-2"></i>'+ msg +'</div>');
+            }
+
+        } catch(err){
+            showInModal('<div class="alert alert-danger mb-0"><i class="fa-solid fa-triangle-exclamation me-2"></i> Terjadi kesalahan jaringan. Coba lagi.</div>');
+            console.error('cekStatus error:', err);
+        }
+    }
+
+    if(form){
+        form.addEventListener('submit', function(e){
+            e.preventDefault();
+            cekStatus();
+        });
+    }
+})();

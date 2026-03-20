@@ -156,18 +156,33 @@
 
 		<div class="row g-4">
 			<div class="col-md-4">
-				<div class="chart-card h-100 p-4">
-					<canvas id="chartDoughnut"></canvas>
+				<div class="chart-card h-100 d-flex flex-column p-4">
+					<div class="flex-grow-1 d-flex align-items-center justify-content-center">
+						<canvas id="chartDoughnut"></canvas>
+					</div>
+					<div class="mt-4 text-center fw-bold text-secondary">
+						Distribusi LPJU Berdasarkan Daya
+					</div>
 				</div>
 			</div>
 			<div class="col-md-4">
-				<div class="chart-card h-100 p-4">
-					<canvas id="chartBar"></canvas>
+				<div class="chart-card h-100 d-flex flex-column p-4">
+					<div class="flex-grow-1 d-flex align-items-center justify-content-center">
+						<canvas id="chartBar"></canvas>
+					</div>
+					<div class="mt-4 text-center fw-bold text-secondary">
+						Rekapitulasi Total Aset & Daya
+					</div>
 				</div>
 			</div>
 			<div class="col-md-4">
-				<div class="chart-card h-100 p-4">
-					<canvas id="chartPie"></canvas>
+				<div class="chart-card h-100 d-flex flex-column p-4">
+					<div class="flex-grow-1 d-flex align-items-center justify-content-center">
+						<canvas id="chartPie"></canvas>
+					</div>
+					<div class="mt-4 text-center fw-bold text-secondary">
+						Distribusi LPJU per Nama
+					</div>
 				</div>
 			</div>
 		</div>
@@ -284,112 +299,10 @@ Copyright © 2024 Dinas Perhubungan Kabupaten Sleman.
         doughnutLabels: <?= json_encode($doughnutLabels ?? []) ?>,
         doughnutData: <?= json_encode($doughnutData ?? []) ?>,
         pieLabels: <?= json_encode($pieLabels ?? []) ?>,
-        pieData: <?= json_encode($pieData ?? []) ?>
+        pieData: <?= json_encode($pieData ?? []) ?>,
+        // FIXED: Using rtrim to ensure a clean, absolute base path without double slashes
+        apiCekStatusUrl: '<?= rtrim(base_url(), '/') ?>/api/cek-status'
     };
-</script>
-
-<script>
-// Cek status laporan menggunakan Fetch API — tampilkan hasil di modal Bootstrap
-(function(){
-	const form = document.querySelector('form.cek-box');
-	const input = document.getElementById('nomor_tiket');
-	const hasilEl = document.getElementById('hasil_status'); // fallback if modal not available
-	const modalEl = document.getElementById('modal_hasil_status');
-	const modalBody = document.getElementById('modal_hasil_status_body');
-	const bsModal = (typeof bootstrap !== 'undefined' && modalEl) ? new bootstrap.Modal(modalEl) : null;
-
-	function escapeHTML(s){
-		return String(s || '')
-			.replace(/&/g,'&amp;')
-			.replace(/</g,'&lt;')
-			.replace(/>/g,'&gt;')
-			.replace(/"/g,'&quot;')
-			.replace(/'/g,'&#39;');
-	}
-
-	function statusBadgeColored(status){
-		const raw = String(status || '').trim();
-		const key = raw.toLowerCase();
-		let cls = 'bg-secondary';
-		let label = raw || '-';
-
-		if(!raw) {
-			cls = 'bg-secondary';
-		} else if(key.includes('belum') || key.includes('pending')){
-			cls = 'bg-secondary';
-		} else if(key.includes('selesai') || key.includes('sukses') || key.includes('success') || key.includes('done')){
-			cls = 'bg-success';
-		} else if(key.includes('gagal') || key.includes('fail') || key.includes('failed')){
-			cls = 'bg-danger';
-		} else {
-			cls = 'bg-secondary';
-		}
-
-		return `<span class="badge ${cls} text-white">${escapeHTML(label)}</span>`;
-	}
-
-	function showInModal(html){
-		if(modalBody && bsModal){
-			modalBody.innerHTML = html;
-			try{ bsModal.show(); }catch(e){ console.warn(e); if(hasilEl) hasilEl.innerHTML = html; }
-		} else if(hasilEl){
-			// fallback: render inline
-			hasilEl.innerHTML = html;
-		}
-	}
-
-	async function cekStatus(){
-		const nomor = (input.value || '').trim();
-		if(!nomor){
-			const warn = '<div class="alert alert-warning mb-0">Nomor tiket harus diisi</div>';
-			showInModal(warn);
-			return;
-		}
-
-		showInModal('<div class="text-muted">Memeriksa status...</div>');
-
-		const url = '/siap-maju/public/api/cek-status?nomor_tiket=' + encodeURIComponent(nomor);
-
-		try{
-			const resp = await fetch(url, { method: 'GET', cache: 'no-store' });
-			if(!resp.ok) throw new Error('HTTP ' + resp.status);
-			const data = await resp.json();
-
-			if(data && data.status){
-				const d = data.data || {};
-				const html = `
-					<div class="card">
-					  <div class="card-body">
-						<div class="d-flex justify-content-between align-items-start mb-2">
-						  <div><strong>No. Tiket:</strong> ${escapeHTML(d.nomor_tiket || nomor)}</div>
-						  ${statusBadgeColored(d.status_perbaikan)}
-						</div>
-						<div><strong>Lokasi:</strong> ${escapeHTML(d.lokasi || '-')}</div>
-						<div><strong>Tanggal:</strong> ${escapeHTML(d.tanggal || '-')}</div>
-					  </div>
-					</div>
-				`;
-				showInModal(html);
-			} else {
-				const msg = (data && data.message) ? escapeHTML(data.message) : 'Data tidak ditemukan.';
-				showInModal('<div class="alert alert-danger mb-0">'+ msg +'</div>');
-			}
-
-		} catch(err){
-			showInModal('<div class="alert alert-danger mb-0">Terjadi kesalahan: '+ escapeHTML(err.message || String(err)) +'</div>');
-			console.error('cekStatus error:', err);
-		}
-	}
-
-	if(form){
-		form.addEventListener('submit', function(e){
-			e.preventDefault();
-			cekStatus();
-		});
-	}
-
-	window.cekStatus = cekStatus;
-})();
 </script>
 
 <script src="<?= base_url('assets/js/landing.js') ?>"></script>
