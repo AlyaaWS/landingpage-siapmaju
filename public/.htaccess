@@ -1,5 +1,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
 
     # Serve real files and directories directly (CSS, JS, images, fonts, etc.)
     RewriteCond %{REQUEST_FILENAME} -f [OR]

@@ -108,26 +108,26 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ─── Camera-based scanner using Html5Qrcode (lower-level API for more control) ───
-  function startScannerWithCameraId(cameraId) {
-    logToScreen('Memulai scanner dengan kamera: ' + cameraId, 'info');
+  function startScanner(cameraIdOrConfig) {
+    logToScreen('Memulai scanner dengan: ' + JSON.stringify(cameraIdOrConfig), 'info');
     readerEl.innerHTML = '';
     scanner = new Html5Qrcode(readerId);
     scanner.start(
-      cameraId,
+      cameraIdOrConfig,
       { fps: 10, qrbox: { width: 250, height: 250 } },
       onScanSuccess,
       function () { /* ignore per-frame misses */ }
     ).then(function () {
       logToScreen('Kamera berhasil dibuka ✓', 'success');
     }).catch(function (err) {
-      logToScreen('Gagal start kamera (' + cameraId + '): ' + describeError(err), 'error');
+      logToScreen('Gagal start kamera (' + JSON.stringify(cameraIdOrConfig) + '): ' + describeError(err), 'error');
       showUploadFallback();
     });
   }
 
   // ─── Attempt camera with progressive fallback ───
   // Strategy:
-  //   1. Try rear camera via facingMode constraint
+  //   1. Try rear camera directly via facingMode: environment constraint
   //   2. If that fails, enumerate devices and pick any camera
   //   3. If everything fails, show upload fallback
   function attemptCamera() {
@@ -140,53 +140,45 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    logToScreen('Mencoba akses kamera belakang (environment)…', 'info');
+    logToScreen('Mencoba akses kamera belakang (environment) langsung…', 'info');
 
-    // Step 1: try environment (rear) camera
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } } })
-      .then(function (stream) {
-        stream.getTracks().forEach(function (t) { t.stop(); });
-        logToScreen('Kamera belakang tersedia, mengambil daftar perangkat…', 'info');
-        return pickAndStart('environment');
-      })
-      .catch(function (err1) {
-        logToScreen('Kamera belakang gagal: ' + describeError(err1), 'warn');
-        logToScreen('Fallback: mencoba kamera APA SAJA…', 'info');
+    // Step 1: start scanner directly with facingMode: environment (rear camera)
+    readerEl.innerHTML = '';
+    scanner = new Html5Qrcode(readerId);
+    scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      onScanSuccess,
+      function () { /* ignore per-frame misses */ }
+    ).then(function () {
+      logToScreen('Kamera belakang berhasil dibuka ✓', 'success');
+    }).catch(function (err1) {
+      logToScreen('Kamera belakang gagal: ' + describeError(err1), 'warn');
+      logToScreen('Fallback: mencoba enumerate kamera…', 'info');
 
-        // Step 2: try ANY camera
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(function (stream) {
-            stream.getTracks().forEach(function (t) { t.stop(); });
-            logToScreen('Kamera generik tersedia.', 'info');
-            return pickAndStart(null);
-          })
-          .catch(function (err2) {
-            logToScreen('Semua upaya kamera gagal: ' + describeError(err2), 'error');
-            readerEl.innerHTML =
-              '<div class="text-danger p-3">' +
-                '<strong>Kamera tidak dapat diakses.</strong><br>' +
-                '<span class="small">' + describeError(err2) + '</span>' +
-              '</div>' +
-              '<button id="retry-camera" class="btn btn-primary btn-sm mt-2">Coba Lagi</button>';
-            showUploadFallback();
-
-            var retry = document.getElementById('retry-camera');
-            if (retry) {
-              retry.addEventListener('click', function () {
-                readerEl.innerHTML = '<div class="text-muted p-3">Mencoba ulang…</div>';
-                attemptCamera();
-              });
-            }
-          });
-      });
+      // Step 2: enumerate cameras and pick any available one
+      pickAndStart(null);
+    });
   }
 
-  // ─── Enumerate cameras and start scanning ───
+  // ─── Enumerate cameras and start scanning (fallback) ───
   function pickAndStart(preferredFacing) {
     Html5Qrcode.getCameras().then(function (cameras) {
       if (!cameras || cameras.length === 0) {
         logToScreen('Tidak ditemukan perangkat kamera.', 'error');
+        readerEl.innerHTML =
+          '<div class="text-danger p-3">' +
+            '<strong>Kamera tidak dapat diakses.</strong>' +
+          '</div>' +
+          '<button id="retry-camera" class="btn btn-primary btn-sm mt-2">Coba Lagi</button>';
         showUploadFallback();
+        var retry = document.getElementById('retry-camera');
+        if (retry) {
+          retry.addEventListener('click', function () {
+            readerEl.innerHTML = '<div class="text-muted p-3">Mencoba ulang…</div>';
+            attemptCamera();
+          });
+        }
         return;
       }
 
@@ -194,7 +186,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       var chosen = cameras[0]; // default: first camera
 
-      if (preferredFacing === 'environment' && cameras.length > 1) {
+      if (cameras.length > 1) {
         // Heuristic: pick the camera whose label contains "back", "rear", "environment", or "belakang"
         for (var i = 0; i < cameras.length; i++) {
           var label = (cameras[i].label || '').toLowerCase();
@@ -210,10 +202,23 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       logToScreen('Menggunakan kamera: ' + (chosen.label || chosen.id), 'info');
-      startScannerWithCameraId(chosen.id);
+      startScanner(chosen.id);
     }).catch(function (err) {
       logToScreen('getCameras() gagal: ' + describeError(err), 'error');
+      readerEl.innerHTML =
+        '<div class="text-danger p-3">' +
+          '<strong>Kamera tidak dapat diakses.</strong><br>' +
+          '<span class="small">' + describeError(err) + '</span>' +
+        '</div>' +
+        '<button id="retry-camera" class="btn btn-primary btn-sm mt-2">Coba Lagi</button>';
       showUploadFallback();
+      var retry = document.getElementById('retry-camera');
+      if (retry) {
+        retry.addEventListener('click', function () {
+          readerEl.innerHTML = '<div class="text-muted p-3">Mencoba ulang…</div>';
+          attemptCamera();
+        });
+      }
     });
   }
 
