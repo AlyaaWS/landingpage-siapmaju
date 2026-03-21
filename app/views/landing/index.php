@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <title><?= $judul ?? 'SIAP MAJU'; ?></title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,7 +16,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="<?= base_url('assets/css/landing.css') ?>">
+<link rel="stylesheet" href="<?= base_url('assets/css/landing.css?v=' . time()) ?>">
 
 <style>
 /* small smooth animation for modal appearance */
@@ -293,7 +297,7 @@ Copyright © 2024 Dinas Perhubungan Kabupaten Sleman.
     // Pass PHP data to global JS object safely using the exact variables returned by DashboardModel
     window.__DASHBOARD_DATA__ = {
         summary: {
-            total_lpju: <?= $totalLaporan ?? 0 ?>,
+            total_lpju: <?= $barData[0] ?? 0 ?>,
             total_daya: <?= $barData[1] ?? 0 ?> 
         },
         doughnutLabels: <?= json_encode($doughnutLabels ?? []) ?>,
@@ -305,7 +309,7 @@ Copyright © 2024 Dinas Perhubungan Kabupaten Sleman.
     };
 </script>
 
-<script src="<?= base_url('assets/js/landing.js') ?>"></script>
+<script src="<?= base_url('assets/js/landing.js?v=' . time()) ?>"></script>
 
 </body>
 </html>
