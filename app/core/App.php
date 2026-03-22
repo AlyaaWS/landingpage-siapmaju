@@ -1,10 +1,29 @@
 <?php
 
-require_once __DIR__ . '/../../vendor/autoload.php';
-require_once __DIR__ . '/Router.php';
-require_once __DIR__ . '/Controller.php';
-require_once __DIR__ . '/Database.php';
-require_once __DIR__ . '/Model.php';
+// 1. Conditionally load Composer Autoloader (For Local Development)
+$composerAutoload = __DIR__ . '/../../vendor/autoload.php';
+if (file_exists($composerAutoload)) {
+    require_once $composerAutoload;
+}
+
+// 2. Native Custom Autoloader (For Production without Composer)
+spl_autoload_register(function ($className) {
+    // Array of directories where MVC classes might be located
+    $directories = [
+        __DIR__ . '/',                  // app/core/
+        __DIR__ . '/../controllers/',   // app/controllers/
+        __DIR__ . '/../models/'         // app/models/
+    ];
+
+    // Loop through directories to find and load the requested class
+    foreach ($directories as $directory) {
+        $file = $directory . $className . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
+    }
+});
 
 class App
 {
@@ -46,20 +65,6 @@ class App
 
         require_once __DIR__ . '/../helpers/url.php';
         require_once __DIR__ . '/../helpers/csrf.php';
-
-        spl_autoload_register(function ($class) {
-            $controllerPath = __DIR__ . '/../controllers/' . $class . '.php';
-            $modelPath      = __DIR__ . '/../models/' . $class . '.php';
-            $middlewarePath = __DIR__ . '/../middlewares/' . $class . '.php';
-
-            if (file_exists($controllerPath)) {
-                require_once $controllerPath;
-            } elseif (file_exists($modelPath)) {
-                require_once $modelPath;
-            } elseif (file_exists($middlewarePath)) {
-                require_once $middlewarePath;
-            }
-        });
     }
 
     public function run()

@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= $judul ?? 'Scan Barcode'; ?></title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= base_url('assets/css/landing.css') ?>">
 <style>
@@ -102,10 +102,10 @@
 <footer class="mt-4"></footer>
 
 <!-- libs: primary CDN + fallback if primary fails -->
-<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.7/html5-qrcode.min.js" integrity="sha384-hJMcc4vZxKbPwUvrjl/f7MWYnIQvANoP8ItXzz0nUy9i6D0ShaiIMj32mTZGb9kj" crossorigin="anonymous"></script>
 <script>
   if (typeof Html5Qrcode === 'undefined') {
-    document.write('<script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js"><\/script>');
+    document.write('<script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js" integrity="sha384-hJMcc4vZxKbPwUvrjl/f7MWYnIQvANoP8ItXzz0nUy9i6D0ShaiIMj32mTZGb9kj" crossorigin="anonymous"><\/script>');
   }
 </script>
 <script src="<?= base_url('assets/js/scan.js') ?>"></script>

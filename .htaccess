@@ -1,8 +1,30 @@
-RewriteEngine On
+<IfModule mod_rewrite.c>
+    Options -Indexes
+    RewriteEngine On
+    RewriteBase /
+    
+    # Biarkan browser mengakses file fisik secara langsung (contoh: CSS, JS, Gambar)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Belokkan semua lalu lintas selain file fisik ke index.php yang ada di root
+    RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+</IfModule>
 
-# Force all traffic into the public/ subdirectory.
-# This handles the case where the virtual-host / alias docroot is set
-# to the project root instead of project/public.
-
-RewriteCond %{REQUEST_URI} !^/public/
-RewriteRule ^(.*)$ public/$1 [L]
+<IfModule mod_headers.c>
+    # Prevent Clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+    
+    # Prevent MIME-sniffing
+    Header set X-Content-Type-Options "nosniff"
+    
+    # Enforce HTTPS (HSTS)
+    Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    
+    # Control Referrer Information
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Balanced CSP: Allows inline scripts/styles for UI functionality but restricts objects and iframes
+    # Note: connect-src explicitly allows calls to the Admin API
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https: blob:; connect-src 'self' https://adminpju.dishubsleman.id https:; object-src 'none'; base-uri 'none'; frame-ancestors 'none';"
+</IfModule>
