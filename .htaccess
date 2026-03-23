@@ -1,15 +1,14 @@
-<IfModule mod_rewrite.c>
-    Options -Indexes
-    RewriteEngine On
-    RewriteBase /
-    
-    # Biarkan browser mengakses file fisik secara langsung (contoh: CSS, JS, Gambar)
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    
-    # Belokkan semua lalu lintas selain file fisik ke index.php yang ada di root
-    RewriteRule ^(.*)$ index.php/$1 [L,QSA]
-</IfModule>
+# Root .htaccess disabled to avoid conflicts with public/.htaccess
+# <IfModule mod_rewrite.c>
+#     Options -Indexes
+#     RewriteEngine On
+#     RewriteBase /
+# 
+#     RewriteCond %{REQUEST_FILENAME} !-f
+#     RewriteCond %{REQUEST_FILENAME} !-d
+# 
+#     RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+# </IfModule>
 
 <IfModule mod_headers.c>
     # Prevent Clickjacking

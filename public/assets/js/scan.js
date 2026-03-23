@@ -57,45 +57,56 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ─── WhatsApp URL interceptor ───
   // Intercepts wa.me links, extracts the ID, and redirects to local detail page.
+  // ─── WhatsApp URL interceptor ───
   function handleDecodedText(decodedText) {
     logToScreen('QR Terdeteksi: ' + decodedText, 'success');
 
-    if (decodedText.includes('wa.me')) {
-      try {
-        var url = new URL(decodedText);
-        var textParam = url.searchParams.get('text'); // e.g. "ID PJU 36"
-
-        if (textParam) {
-          var baseUrl = '';
-          var currentHost = window.location.hostname;
-
-          if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost.startsWith('192.168') || currentHost.includes('ngrok-free.app')) {
-            baseUrl = window.location.origin + '/lpju-sleman-test/public';
-          } else {
-            baseUrl = 'https://adminpju.dishubsleman.id';
-          }
-
-          var extractedText = textParam.toUpperCase();
-
-          if (extractedText.includes('PJU')) {
-            var extractedId = textParam.replace(/ID PJU /i, '').trim();
-            logToScreen('WhatsApp URL terdeteksi — PJU ID: ' + extractedId + ' (dari: ' + textParam + ')', 'success');
-            window.location.href = baseUrl + '/pju/detail?id=' + encodeURIComponent(extractedId);
-            return;
-          } else if (extractedText.includes('KWH')) {
-            var extractedId = textParam.replace(/ID KWH /i, '').trim();
-            logToScreen('WhatsApp URL terdeteksi — KWH ID: ' + extractedId + ' (dari: ' + textParam + ')', 'success');
-            window.location.href = baseUrl + '/kwh/detail?id=' + encodeURIComponent(extractedId);
-            return;
-          }
-        }
-      } catch (e) {
-        logToScreen('Gagal parse WA URL: ' + e, 'error');
+    try {
+      if (decodedText.includes('/pju/detail') || decodedText.includes('/kwh/detail')) {
+        window.location.href = decodedText;
+        return;
       }
-    }
 
-    // Fallback for non-WA links or if parsing failed
-    alert('Scanned: ' + decodedText);
+      if (decodedText.includes('wa.me')) {
+        var fullText = decodeURIComponent(decodedText);
+        var isPJU = fullText.toUpperCase().includes('ID PJU');
+        var isKWH = fullText.toUpperCase().includes('ID KWH');
+        var secureId = "";
+
+        // Bulletproof string splitting to extract the hash
+        if (fullText.includes('(Kode:')) {
+            var splitLeft = fullText.split('(Kode:'); 
+            if (splitLeft.length > 1) {
+                var splitRight = splitLeft[1].split(')');
+                secureId = splitRight[0].trim();
+            }
+        }
+
+        if (!secureId) {
+            alert("Format QR tidak valid. Teks: " + fullText);
+            return;
+        }
+
+        // Dynamic Routing for JS
+        var currentHost = window.location.hostname;
+        var baseUrl = 'https://adminpju.dishubsleman.id'; 
+        if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost.includes('ngrok')) {
+            baseUrl = window.location.origin + '/lpju-sleman-test/public';
+        }
+
+        if (isPJU) {
+            window.location.href = baseUrl + '/pju/detail?id=' + encodeURIComponent(secureId);
+        } else if (isKWH) {
+            window.location.href = baseUrl + '/kwh/detail?id=' + encodeURIComponent(secureId);
+        }
+        return;
+      }
+
+      alert('QR Code tidak dikenali oleh sistem SIAP MAJU:\n' + decodedText);
+
+    } catch (e) {
+      alert('Format QR Code rusak: ' + e);
+    }
   }
 
   function onScanSuccess(decodedText) {

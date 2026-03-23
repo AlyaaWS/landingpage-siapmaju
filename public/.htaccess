@@ -4,7 +4,7 @@
 <IfModule mod_rewrite.c>
     Options -Indexes
     RewriteEngine On
-    RewriteBase /
+    RewriteBase /landingpage-siapmaju/public
 
     # Do not route if the request is for an existing physical file or directory
     RewriteCond %{REQUEST_FILENAME} !-f
