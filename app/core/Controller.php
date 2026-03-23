@@ -2,26 +2,21 @@
 
 class Controller
 {
-    protected function view(string $view, array $data = []): void
-    {
-        extract($data, EXTR_SKIP);
+    public function view($view, $data = []) {
+        // Path to the views folder
+        $viewFile = __DIR__ . '/../views/' . $view . '.php';
 
-        $viewFile   = __DIR__ . '/../views/' . $view . '.php';
-        $layoutFile = __DIR__ . '/../views/layouts/app.php';
-
-        if (!file_exists($viewFile)) {
-            http_response_code(500);
-            echo "View tidak ditemukan: " . htmlspecialchars($view);
-            return;
-        }
-
-        $useLayout = $data['_layout'] ?? true;
-
-        if ($useLayout && file_exists($layoutFile)) {
-            // Layout biasanya akan me-render $viewFile di dalamnya
-            require $layoutFile;
+        if (file_exists($viewFile)) {
+            // CRITICAL FIX: Extract array keys into variables for the view
+            extract($data);
+            require_once $viewFile;
         } else {
-            require $viewFile;
+            // Stop execution and show EXACTLY what file Linux is looking for
+            die("<div style='color:red; font-family:sans-serif; padding:20px; border:1px solid red;'>"
+                . "<h3>View File Not Found!</h3>"
+                . "<p>Linux is strictly looking for exactly: <strong>" . htmlspecialchars($viewFile) . "</strong></p>"
+                . "<p>Please check your <code>app/views/</code> folder and ensure the folder and file names match the uppercase/lowercase letters perfectly.</p>"
+                . "</div>");
         }
     }
 

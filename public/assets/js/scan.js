@@ -59,27 +59,26 @@ document.addEventListener('DOMContentLoaded', function () {
   // Intercepts wa.me links, extracts the ID, and redirects to local detail page.
   // ─── WhatsApp URL interceptor ───
   function handleDecodedText(decodedText) {
-    logToScreen('QR Terdeteksi: ' + decodedText, 'success');
+    logToScreen('QR Terdeteksi, memproses...', 'success');
 
     try {
+      // Direct URL fallback
       if (decodedText.includes('/pju/detail') || decodedText.includes('/kwh/detail')) {
-        window.location.href = decodedText;
+        window.location.assign(decodedText);
         return;
       }
 
       if (decodedText.includes('wa.me')) {
-        var fullText = decodeURIComponent(decodedText);
+        var fullText = decodeURIComponent(decodedText).replace(/\+/g, ' ');
+        
         var isPJU = fullText.toUpperCase().includes('ID PJU');
         var isKWH = fullText.toUpperCase().includes('ID KWH');
         var secureId = "";
 
-        // Bulletproof string splitting to extract the hash
-        if (fullText.includes('(Kode:')) {
-            var splitLeft = fullText.split('(Kode:'); 
-            if (splitLeft.length > 1) {
-                var splitRight = splitLeft[1].split(')');
-                secureId = splitRight[0].trim();
-            }
+        // Extract hash from inside (Kode: ...)
+        var match = fullText.match(/\(Kode:\s*([^)]+)\)/i);
+        if (match && match[1]) {
+            secureId = match[1].trim();
         }
 
         if (!secureId) {
@@ -87,25 +86,47 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Dynamic Routing for JS
+        // --- FIXED BASE URL LOGIC ---
         var currentHost = window.location.hostname;
+        
+        // Default target is ALWAYS the Admin server in production
         var baseUrl = 'https://adminpju.dishubsleman.id'; 
+        
+        // Local dev fallback (points to the local admin folder)
         if (currentHost === 'localhost' || currentHost === '127.0.0.1' || currentHost.includes('ngrok')) {
-            baseUrl = window.location.origin + '/lpju-sleman-test/public';
+            baseUrl = window.location.origin + '/lpju-sleman-test/public'; 
         }
 
+        var targetUrl = "";
         if (isPJU) {
-            window.location.href = baseUrl + '/pju/detail?id=' + encodeURIComponent(secureId);
+            targetUrl = baseUrl + '/pju/detail?id=' + encodeURIComponent(secureId);
         } else if (isKWH) {
-            window.location.href = baseUrl + '/kwh/detail?id=' + encodeURIComponent(secureId);
+            targetUrl = baseUrl + '/kwh/detail?id=' + encodeURIComponent(secureId);
         }
-        return;
+
+        if (targetUrl !== "") {
+            // Visual feedback before force redirect
+            var readerEl = document.getElementById('reader');
+            if (readerEl) {
+                readerEl.innerHTML = '<div style="padding: 30px; text-align: center; color: #198754;">' +
+                                     '<i class="fa-solid fa-circle-check fa-3x mb-3"></i>' +
+                                     '<h4>QR Valid!</h4>' +
+                                     '<p>Mengalihkan ke halaman detail...</p>' +
+                                     '</div>';
+            }
+            
+            // Force browser navigation after 0.5s
+            setTimeout(function() {
+                window.location.assign(targetUrl);
+            }, 500);
+            return;
+        }
       }
 
-      alert('QR Code tidak dikenali oleh sistem SIAP MAJU:\n' + decodedText);
+      alert('QR Code tidak dikenali oleh sistem:\n' + decodedText);
 
     } catch (e) {
-      alert('Format QR Code rusak: ' + e);
+      alert('Terjadi kesalahan sistem: ' + e);
     }
   }
 

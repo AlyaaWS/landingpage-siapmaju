@@ -67,13 +67,60 @@ class App
         require_once __DIR__ . '/../helpers/csrf.php';
     }
 
-    public function run()
+    private function parseUrl()
     {
-        $router = new Router();
+        $url = $_GET['url'] ?? '';
+        $url = filter_var(rtrim($url, '/'), FILTER_SANITIZE_URL);
+        return explode('/', $url);
+    }
 
-        require_once __DIR__ . '/../../routes/web.php';
+   public function run()
+    {
+        $url = $this->parseUrl();
 
-        $router->dispatch();
+        // 1. Set Default Controller & Method
+        $controllerName = 'Landing'; // <-- Controller utama jika URL kosong
+        $methodName = 'index';       // <-- Method utama jika tidak disebutkan
+
+        // 2. Cek apakah index [0] dari URL adalah Controller yang valid
+        if (isset($url[0])) {
+            $potentialController = ucfirst(strtolower($url[0])); // Standar Linux (Huruf depan besar)
+            if (file_exists(__DIR__ . '/../controllers/' . $potentialController . 'Controller.php')) {
+                $controllerName = $potentialController;
+                unset($url[0]); // Hapus dari array URL jika cocok sebagai Controller
+            }
+        }
+
+        // 3. Muat file Controller
+        $controllerFile = __DIR__ . '/../controllers/' . $controllerName . 'Controller.php';
+        if (file_exists($controllerFile)) {
+            require_once $controllerFile;
+            $controllerClass = $controllerName . 'Controller';
+
+            if (class_exists($controllerClass)) {
+                $controllerInstance = new $controllerClass();
+
+                // 4. Cari Method yang diminta (bisa di $url[1] atau $url[0] jika Controller pakai Default)
+                // Ini penting agar URL "/scan" bisa masuk ke LandingController->scan()
+                $potentialMethod = $url[1] ?? ($url[0] ?? null);
+
+                if ($potentialMethod && method_exists($controllerInstance, $potentialMethod)) {
+                    $methodName = $potentialMethod;
+                    // Bersihkan array parameter
+                    if (isset($url[1])) { unset($url[1]); }
+                    elseif (isset($url[0])) { unset($url[0]); }
+                }
+
+                // 5. Jalankan Class dan Method beserta sisa parameternya
+                $params = $url ? array_values($url) : [];
+                call_user_func_array([$controllerInstance, $methodName], $params);
+                return; // Selesai
+            }
+        }
+
+        // 6. Jika tidak ada yang cocok, baru tampilkan 404
+        http_response_code(404);
+        echo "404 - Halaman Tidak Ditemukan. Pastikan nama Controller sesuai dengan URL.";
     }
 }
 

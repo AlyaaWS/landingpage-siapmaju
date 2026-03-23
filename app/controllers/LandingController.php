@@ -9,7 +9,7 @@ class LandingController extends Controller {
         $kpi   = $dashboard->getPerbaikanMetrics();
         $chart = $dashboard->getAsetMetrics();
 
-        $this->view('landing/index', array_merge(
+        $data = array_merge(
             [
                 '_layout' => false,
                 'judul'   => 'SIAP MAJU - Pengaduan PJU Sleman',
@@ -18,8 +18,9 @@ class LandingController extends Controller {
             ],
             $kpi,
             $chart
-        ));
-        
+        );
+
+        $this->view('landing/index', $data);
     }
 
     /**

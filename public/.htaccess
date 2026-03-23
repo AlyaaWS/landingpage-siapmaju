@@ -2,16 +2,11 @@
 # 1. CORE MVC ROUTING RULES (DO NOT REMOVE)
 # ==========================================
 <IfModule mod_rewrite.c>
-    Options -Indexes
+    Options -Multiviews
     RewriteEngine On
-    RewriteBase /landingpage-siapmaju/public
-
-    # Do not route if the request is for an existing physical file or directory
-    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-
-    # Route everything else to index.php
-    RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]
 </IfModule>
 
 # ==========================================

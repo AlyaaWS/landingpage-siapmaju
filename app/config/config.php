@@ -7,23 +7,24 @@ define('APP_NAME', 'LANDING PAGE SIAP MAJU');
 define('APP_ENV', 'production'); // TODO: set to 'production' on live server
 
 // ── Dynamic Base URL ───────────────────────────────────────────────────────
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$http_host = $_SERVER['HTTP_HOST'] ?? '';
 
-// Deteksi HTTPS tingkat lanjut (Paksa HTTPS jika menggunakan Ngrok)
-$is_https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || 
-            (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') || 
-            (strpos($host, 'ngrok') !== false); // <- Paksa HTTPS untuk ngrok
+// Check for SSL from various server headers
+$is_secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+              ($_SERVER['SERVER_PORT'] == 443) || 
+              (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-$protocol = $is_https ? 'https' : 'http';
+$protocol = $is_secure ? 'https' : 'http';
 
-// Tentukan URL berdasarkan environment
-if (strpos($host, 'localhost') !== false || strpos($host, '127.0.0.1') !== false || strpos($host, 'ngrok') !== false) {
-    // PASTIKAN nama folder ini sesuai dengan folder project Anda di Laragon
-    $url = $protocol . '://' . $host . '/landingpage-siapmaju/public';
+if (strpos($http_host, 'pju.dishubsleman.id') !== false) {
+    // PRODUCTION URL (Direct domain, no subfolders)
+    $url = 'https://pju.dishubsleman.id';
 } else {
-    // URL Production
-    $url = 'https://adminpju.dishubsleman.id'; 
+    // LOCAL / NGROK URL (With subfolders)
+    $url = $protocol . '://' . $http_host . '/landingpage-siapmaju/public';
 }
+
+define('BASEURL', rtrim($url, '/'));
 
 // Definisikan Konstanta URL
 if (!defined('APP_URL')) { define('APP_URL', $url); }
