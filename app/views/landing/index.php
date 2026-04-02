@@ -270,7 +270,7 @@ Address: Dinas Perhubungan Sleman, Yogyakarta
 </div>
 
 <div class="footer-bottom">
-Copyright © 2024 Dinas Perhubungan Kabupaten Sleman.
+Copyright © 2026 Dinas Perhubungan Kabupaten Sleman.
 </div>
 
 </footer>
