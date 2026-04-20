@@ -56,7 +56,13 @@ class Router
 
         if (!$route) {
             http_response_code(404);
-            echo "404 - Route not found: " . htmlspecialchars($path);
+            // Return JSON for API routes so frontend fetch() can parse it
+            if (str_starts_with($path, '/api/')) {
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['status' => false, 'message' => 'API endpoint tidak ditemukan.']);
+            } else {
+                echo "404 - Route not found: " . htmlspecialchars($path);
+            }
             return;
         }
 

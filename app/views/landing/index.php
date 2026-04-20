@@ -66,7 +66,10 @@
 			<div class="col-lg-6 text-center text-md-start">
 				<h1 class="display-5 display-md-3 fw-bold mb-3">SIAP MAJU</h1>
 				<p class="lead text-white-75 mb-4">Portal resmi aduan PJU Dishub Sleman. Laporkan tiang atau lampu jalan rusak di lingkungan Anda dengan mudah dan pantau statusnya.</p>
-				<a href="<?= base_url('scan') ?>" class="btn btn-primary px-4">Scan Barcode Sekarang</a>
+				<div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
+					<a href="<?= base_url('scan') ?>" class="btn btn-primary px-4"><i class="fa-solid fa-qrcode me-1"></i> Scan Barcode</a>
+					<button type="button" class="btn btn-outline-light px-4" data-bs-toggle="modal" data-bs-target="#modalInputPju"><i class="fa-solid fa-keyboard me-1"></i> Input ID PJU</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -98,9 +101,9 @@
 					<div class="card-alur h-100 d-flex flex-column p-4 text-center">
 						<div class="card-head d-flex flex-column align-items-center">
 							<div class="icon-box mb-3"><i class="fa-solid fa-mobile-screen fa-lg"></i></div>
-							<h6 class="fw-semibold">2. Scan dengan HP</h6>
+							<h6 class="fw-semibold">2. Scan atau Input ID</h6>
 						</div>
-						<p class="card-desc text-muted small mt-3 mt-md-2 mt-auto">Klik tombol "Scan Barcode Sekarang" pada web ini, lalu pindai barcode menggunakan kamera HP Anda.</p>
+						<p class="card-desc text-muted small mt-3 mt-md-2 mt-auto">Pindai barcode menggunakan kamera HP Anda, atau masukkan ID PJU secara manual jika barcode tidak tersedia.</p>
 					</div>
 				</div>
 
@@ -275,6 +278,54 @@ Copyright © 2026 Dinas Perhubungan Kabupaten Sleman.
 
 </footer>
 
+<!-- Modal Input ID PJU -->
+<div id="modalInputPju" class="modal fade" tabindex="-1" aria-labelledby="modalInputPjuLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header" style="background:#1a237e;color:#fff;">
+				<h5 class="modal-title" id="modalInputPjuLabel"><i class="fa-solid fa-keyboard me-1"></i> Input Data PJU</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p class="text-muted small mb-3">Masukkan ID PJU yang tertera pada tiang lampu untuk melihat detail dan membuat laporan.</p>
+				<!-- Search Form -->
+				<form id="form-lookup-pju" class="mb-3">
+					<div class="input-group">
+						<span class="input-group-text"><i class="fa-solid fa-hashtag"></i></span>
+						<input type="text" id="input-id-pju" class="form-control" placeholder="Contoh: PJU-001" required autocomplete="off">
+						<button type="submit" class="btn btn-primary" id="btn-cari-pju">
+							<i class="fa-solid fa-magnifying-glass me-1"></i> Cari
+						</button>
+					</div>
+				</form>
+				<!-- Loading -->
+				<div id="pju-loading" class="text-center py-3" style="display:none;">
+					<div class="spinner-border text-primary spinner-border-sm" role="status"></div>
+					<span class="text-muted ms-2 small">Mencari data PJU...</span>
+				</div>
+				<!-- Error -->
+				<div id="pju-error" class="alert alert-danger py-2" style="display:none;" role="alert"></div>
+				<!-- PJU Detail -->
+				<div id="pju-detail-card" class="border rounded-3 p-3 mb-3" style="display:none;">
+					<h6 class="fw-bold mb-2" style="color:#1a237e;"><i class="fa-solid fa-lightbulb me-1"></i> Detail PJU</h6>
+					<div class="row g-2 mb-2" id="pju-info-rows"></div>
+					<div id="kwh-section" style="display:none;">
+						<hr class="my-2">
+						<h6 class="fw-bold mb-2" style="color:#1a237e;"><i class="fa-solid fa-bolt me-1"></i> Detail KWH</h6>
+						<div class="row g-2" id="kwh-info-rows"></div>
+					</div>
+				</div>
+				<!-- Action -->
+				<div id="pju-action-area" class="text-center" style="display:none;">
+					<a id="btn-laporkan" href="#" class="btn btn-primary px-4" target="_blank">
+						<i class="fa-solid fa-file-signature me-1"></i> Laporkan Kerusakan
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
 <!-- Modal untuk menampilkan hasil cek status -->
 <div id="modal_hasil_status" class="modal fade" tabindex="-1" aria-labelledby="modalHasilLabel" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered">
@@ -307,9 +358,14 @@ Copyright © 2026 Dinas Perhubungan Kabupaten Sleman.
         // FIXED: Using rtrim to ensure a clean, absolute base path without double slashes
         apiCekStatusUrl: '<?= rtrim(base_url(), '/') ?>/api/cek-status'
     };
+
+    window.__INPUT_PJU_CONFIG__ = {
+        lookupUrl: '<?= rtrim(base_url(), '/') ?>/api/lookup-pju'
+    };
 </script>
 
 <script src="<?= base_url('assets/js/landing.js?v=' . time()) ?>"></script>
+<script src="<?= base_url('assets/js/input-pju.js?v=' . time()) ?>"></script>
 
 </body>
 </html>

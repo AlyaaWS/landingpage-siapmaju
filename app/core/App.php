@@ -78,6 +78,18 @@ class App
     {
         $url = $this->parseUrl();
 
+        // ── API routes: delegate to Router (routes/web.php) ──────────────
+        // URL segments starting with "api" are handled by the explicit Router
+        // so we can use clean route definitions like /api/lookup-pju.
+        $rawUrl = $_GET['url'] ?? '';
+        if (str_starts_with(trim($rawUrl, '/'), 'api')) {
+            require_once __DIR__ . '/../core/Router.php';
+            $router = new Router();
+            require_once BASE_PATH . '/routes/web.php';
+            $router->dispatch();
+            return;
+        }
+
         // 1. Set Default Controller & Method
         $controllerName = 'Landing'; // <-- Controller utama jika URL kosong
         $methodName = 'index';       // <-- Method utama jika tidak disebutkan

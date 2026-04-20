@@ -79,4 +79,46 @@ class DashboardModel extends Model
             'pieData'        => $pieData,
         ];
     }
+
+    /**
+     * Look up PJU asset + related KWH data by id_pju.
+     * Returns null if not found.
+     */
+    public function lookupPju(string $idPju): ?array
+    {
+        // Look up PJU asset
+        $stmt = $this->db->prepare(
+            "SELECT * FROM aset_lpju WHERE id_pju = ? LIMIT 1"
+        );
+        $stmt->bind_param('s', $idPju);
+        $stmt->execute();
+        $pju = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$pju) {
+            return null;
+        }
+
+        // Look up related KWH data if available (table may not exist)
+        $kwh = null;
+        try {
+            $stmtKwh = $this->db->prepare(
+                "SELECT * FROM aset_kwh WHERE id_pju = ? LIMIT 1"
+            );
+            if ($stmtKwh) {
+                $stmtKwh->bind_param('s', $idPju);
+                $stmtKwh->execute();
+                $kwh = $stmtKwh->get_result()->fetch_assoc();
+                $stmtKwh->close();
+            }
+        } catch (\Throwable $e) {
+            // aset_kwh table might not exist — continue without KWH data
+            error_log('lookupPju KWH query failed: ' . $e->getMessage());
+        }
+
+        return [
+            'pju' => $pju,
+            'kwh' => $kwh,
+        ];
+    }
 }

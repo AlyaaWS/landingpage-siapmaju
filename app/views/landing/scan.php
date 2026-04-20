@@ -91,8 +91,9 @@
 
       <div class="d-flex justify-content-between align-items-center mt-3">
         <div class="text-muted small">Pastikan beri izin akses kamera. Hanya berfungsi di localhost atau HTTPS.</div>
-        <div>
-          <a href="<?= base_url() ?>" id="btn-back" class="btn btn-outline-secondary">Kembali ke Beranda</a>
+        <div class="d-flex gap-2">
+          <a href="<?= base_url('input-pju') ?>" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-keyboard me-1"></i> Input Manual</a>
+          <a href="<?= base_url() ?>" id="btn-back" class="btn btn-outline-secondary btn-sm">Kembali</a>
         </div>
       </div>
     </div>
