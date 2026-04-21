@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
       currentHost === "127.0.0.1" ||
       currentHost.includes("ngrok")
     ) {
-      baseUrl = window.location.origin + "/lpju-sleman-test/public";
+      baseUrl = window.location.origin + "/siap-maju/public";
     }
 
     if (type === "pju") {
@@ -166,25 +166,18 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         var pju = json.data.pju;
-        var kwh = json.data.kwh;
 
-        // Render PJU details
-        renderInfoRows(pjuRows, pjuFields, pju);
-
-        // Render KWH details if present
-        if (kwh) {
-          renderInfoRows(kwhRows, kwhFields, kwh);
-          kwhSection.style.display = "block";
-        } else {
-          kwhSection.style.display = "none";
+        // Immediately redirect to Admin detail page using encrypted secure_id
+        var secureId = pju.secure_id || pju.id_pju || idPju;
+        if (!secureId) {
+          showError("ID terenkripsi tidak tersedia. Tidak dapat mengalihkan.");
+          return;
         }
 
-        detailCard.style.display = "block";
-        actionArea.style.display = "block";
+        var targetUrl = buildAdminUrl(secureId, "pju");
 
-        // Set the report link to admin web detail page (same as QR scan flow)
-        var secureId = pju.secure_id || pju.id_pju || idPju;
-        btnLaporkan.href = buildAdminUrl(secureId, "pju");
+        // Follow the same flow as QR scan (navigate in the current window)
+        window.location.assign(targetUrl);
       })
       .catch(function (err) {
         showLoading(false);

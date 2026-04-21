@@ -19,9 +19,11 @@ $protocol = $is_secure ? 'https' : 'http';
 if (strpos($http_host, 'pju.dishubsleman.id') !== false) {
     // PRODUCTION URL (Direct domain, no subfolders)
     $url = 'https://pju.dishubsleman.id';
+    $adminApiBase = 'https://adminpju.dishubsleman.id';
 } else {
     // LOCAL / NGROK URL (With subfolders)
     $url = $protocol . '://' . $http_host . '/landingpage-siapmaju/public';
+    $adminApiBase = $protocol . '://' . $http_host . '/siap-maju/public';
 }
 
 define('BASEURL', rtrim($url, '/'));
@@ -30,3 +32,6 @@ define('BASEURL', rtrim($url, '/'));
 if (!defined('APP_URL')) { define('APP_URL', $url); }
 if (!defined('BASEURL')) { define('BASEURL', $url); }
 if (!defined('BASE_URL')) { define('BASE_URL', $url); }
+
+// Admin API base URL for server-side proxy calls
+if (!defined('ADMIN_API_BASE')) { define('ADMIN_API_BASE', $adminApiBase); }

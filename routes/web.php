@@ -6,3 +6,5 @@ $router->get('/scan', 'LandingController@scan');
 $router->get('/input-pju', 'LandingController@inputPju');
 // API: lookup PJU by id_pju
 $router->get('/api/lookup-pju', 'LandingController@apiLookupPju');
+// API: proxy cek-status to admin API (avoids CORS)
+$router->get('/api/cek-status', 'LandingController@apiCekStatus');

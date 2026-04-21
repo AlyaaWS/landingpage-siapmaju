@@ -99,6 +99,16 @@ class DashboardModel extends Model
             return null;
         }
 
+        // Compute secure_id (encrypted DB primary id) for admin redirects
+        try {
+            require_once __DIR__ . '/../helpers/SecurityHelper.php';
+            if (!empty($pju['id'])) {
+                $pju['secure_id'] = SecurityHelper::encrypt((string) $pju['id']);
+            }
+        } catch (\Throwable $e) {
+            error_log('lookupPju: failed to compute secure_id: ' . $e->getMessage());
+        }
+
         // Look up related KWH data if available (table may not exist)
         $kwh = null;
         try {
@@ -119,6 +129,97 @@ class DashboardModel extends Model
         return [
             'pju' => $pju,
             'kwh' => $kwh,
+        ];
+    }
+
+    /**
+     * Get tanggal_perbaikan for a given ticket number.
+     */
+    public function getTanggalPerbaikan(string $nomorTiket): ?string
+    {
+        $stmt = $this->db->prepare(
+            'SELECT tanggal_perbaikan FROM perbaikan_pju WHERE nomor_tiket = ? LIMIT 1'
+        );
+        $stmt->bind_param('s', $nomorTiket);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row['tanggal_perbaikan'] ?? null;
+    }
+
+    /**
+     * Retrieve scheduling fields for a ticket: report_date, scheduled_date, actual_date.
+     * Returns associative array with keys 'report_date', 'scheduled_date', 'actual_date' (values may be null).
+     */
+    public function getSchedulingData(string $nomorTiket): array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM perbaikan_pju WHERE nomor_tiket = ? LIMIT 1');
+        $stmt->bind_param('s', $nomorTiket);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        if (!$row) return ['report_date' => null, 'scheduled_date' => null, 'actual_date' => null];
+
+        // Helper to pick the first existing column from candidates
+        $pick = function(array $candidates) use ($row) {
+            foreach ($candidates as $c) {
+                if (array_key_exists($c, $row)) {
+                    $v = trim((string)($row[$c] ?? ''));
+                    if ($v === '' || $v === '0000-00-00' || $v === '0000-00-00 00:00:00') return null;
+                    return $v;
+                }
+            }
+            return null;
+        };
+
+        $reportKeys = ['tanggal', 'tanggal_lapor', 'report_date', 'created_at'];
+        $scheduledKeys = ['tanggal_penjadwalan', 'tanggal_jadwal', 'tanggal_terjadwal', 'scheduled_date', 'tanggal_rencana'];
+        $actualKeys = ['tanggal_perbaikan', 'tanggal_selesai', 'actual_date'];
+
+        $reportDate = $pick($reportKeys);
+        $scheduledDate = $pick($scheduledKeys);
+        $actualDate = $pick($actualKeys);
+
+        return [
+            'report_date'    => $reportDate,
+            'scheduled_date' => $scheduledDate,
+            'actual_date'    => $actualDate,
+        ];
+    }
+
+    /**
+     * Retrieve repair start and finish times for a ticket.
+     * Returns ['repair_date' => ..., 'finish_time' => ...] where values may be null.
+     */
+    public function getRepairTimes(string $nomorTiket): array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM perbaikan_pju WHERE nomor_tiket = ? LIMIT 1');
+        $stmt->bind_param('s', $nomorTiket);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        if (!$row) return ['repair_date' => null, 'finish_time' => null];
+
+        $pick = function(array $candidates) use ($row) {
+            foreach ($candidates as $c) {
+                if (array_key_exists($c, $row)) {
+                    $v = trim((string)($row[$c] ?? ''));
+                    if ($v === '' || $v === '0000-00-00' || $v === '0000-00-00 00:00:00') return null;
+                    return $v;
+                }
+            }
+            return null;
+        };
+
+        $repairKeys = ['repair_date', 'tanggal_mulai', 'started_at', 'waktu_mulai', 'start_time', 'tanggal_perbaikan'];
+        $finishKeys = ['finish_time', 'waktu_selesai', 'tanggal_selesai', 'actual_date', 'selesai_time', 'finished_at'];
+
+        $repairDate = $pick($repairKeys);
+        $finishTime = $pick($finishKeys);
+
+        return [
+            'repair_date' => $repairDate,
+            'finish_time' => $finishTime,
         ];
     }
 }

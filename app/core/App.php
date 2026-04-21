@@ -83,6 +83,17 @@ class App
         // so we can use clean route definitions like /api/lookup-pju.
         $rawUrl = $_GET['url'] ?? '';
         if (str_starts_with(trim($rawUrl, '/'), 'api')) {
+            // ── CORS headers for all API responses ───────────────────────
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+            header('Access-Control-Allow-Headers: Content-Type');
+
+            // Handle preflight OPTIONS requests
+            if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+                http_response_code(204);
+                return;
+            }
+
             require_once __DIR__ . '/../core/Router.php';
             $router = new Router();
             require_once BASE_PATH . '/routes/web.php';
