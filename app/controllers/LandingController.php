@@ -222,43 +222,30 @@ class LandingController extends Controller {
             }
         }
 
-        // Compute work duration using repair start and finish times from DB
-        $repairStart = null;
-        $finishTime = null;
+        // Compute duration in backend using DB TIMESTAMPDIFF (tanggal_perbaikan -> waktu_selesai)
+        $durasiMenit = null;
+        $repairTimes = ['repair_date' => null, 'finish_time' => null];
         try {
             if (!isset($dashboard)) $dashboard = $this->model('DashboardModel');
             $repairTimes = $dashboard->getRepairTimes($nomorTiket);
-            $repairStart = $repairTimes['repair_date'] ?? null;
-            $finishTime = $repairTimes['finish_time'] ?? null;
+            $durasiMenit = $dashboard->getDurasiMenit($nomorTiket);
         } catch (\Throwable $e) {
-            error_log('[enrichWithDuration] repairTimes DB error: ' . $e->getMessage());
+            error_log('[enrichWithDuration] durasi DB error: ' . $e->getMessage());
         }
 
         // expose raw fields for diagnostics
-        $data['repair_date'] = $repairStart;
-        $data['finish_time'] = $finishTime;
+        $data['repair_date'] = $repairTimes['repair_date'] ?? null;
+        $data['finish_time'] = $repairTimes['finish_time'] ?? null;
+        $data['durasi_menit'] = $durasiMenit;
 
-        // If finish_time is missing, duration unknown
-        if (empty($repairStart) || empty($finishTime)) {
+        if ($durasiMenit === null) {
             $data['duration'] = null;
             $data['durasi_ongoing'] = true;
             return $data;
         }
 
-        try {
-            $start = new \DateTime($repairStart);
-            $end = new \DateTime($finishTime);
-        } catch (\Throwable $e) {
-            $data['duration'] = null;
-            $data['durasi_ongoing'] = false;
-            return $data;
-        }
-
-        $diff  = $start->diff($end);
-        $totalMinutes = ($diff->days * 24 + $diff->h) * 60 + $diff->i;
-        $hours = intdiv($totalMinutes, 60);
-        $minutes = $totalMinutes % 60;
-
+        $hours = intdiv((int)$durasiMenit, 60);
+        $minutes = (int)$durasiMenit % 60;
         $parts = [];
         if ($hours > 0) $parts[] = $hours . ' jam';
         if ($minutes > 0) $parts[] = $minutes . ' menit';

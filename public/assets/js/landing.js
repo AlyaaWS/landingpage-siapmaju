@@ -638,9 +638,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (data && data.status) {
         const d = data.data || {};
-        // Use backend-provided duration (DB repair times) — do not compute in frontend
+        // Use backend-provided duration (DB: TIMESTAMPDIFF on p.tanggal -> p.waktu_selesai)
         const rawDur = d.duration;
-        const durasiText = rawDur ? String(rawDur) : "Durasi belum tersedia";
+        const durasiText = rawDur ? String(rawDur) : "durasi belum tersedia";
         const durasiLabel = "Durasi";
 
         const html = `

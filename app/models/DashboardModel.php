@@ -222,4 +222,33 @@ class DashboardModel extends Model
             'finish_time' => $finishTime,
         ];
     }
+
+    /**
+     * Compute duration in minutes using DB TIMESTAMPDIFF between tanggal_perbaikan and waktu_selesai.
+     * Returns integer minutes or null if either field is NULL.
+     */
+    public function getDurasiMenit(string $nomorTiket): ?int
+    {
+        $stmt = $this->db->prepare(
+            "SELECT
+                p.tanggal,
+                p.waktu_selesai,
+                CASE
+                    WHEN p.tanggal IS NULL OR p.waktu_selesai IS NULL THEN NULL
+                    WHEN p.tanggal = '' OR p.waktu_selesai = '' THEN NULL
+                    ELSE TIMESTAMPDIFF(MINUTE, p.tanggal, p.waktu_selesai)
+                END AS durasi_menit
+             FROM perbaikan_pju p
+             WHERE p.nomor_tiket = ?
+             LIMIT 1"
+        );
+        if (!$stmt) return null;
+        $stmt->bind_param('s', $nomorTiket);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $row = $res->fetch_assoc();
+        $stmt->close();
+        if (!$row) return null;
+        return isset($row['durasi_menit']) && $row['durasi_menit'] !== null ? (int)$row['durasi_menit'] : null;
+    }
 }
