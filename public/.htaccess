@@ -35,4 +35,8 @@
     # Balanced CSP: Allows inline scripts/styles for UI functionality but restricts objects and iframes
     # Note: connect-src explicitly allows calls to the Admin API
     Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https: blob:; connect-src 'self' https://adminpju.dishubsleman.id https:; object-src 'none'; base-uri 'none'; frame-ancestors 'none';"
+
+    # Permissions-Policy: allow only camera (QR scanner) and fullscreen (Html5Qrcode mobile UI).
+    # All other sensitive hardware/browser APIs are explicitly denied.
+    Header set Permissions-Policy "camera=(self), fullscreen=(self), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), accelerometer=(), gyroscope=(), magnetometer=(), ambient-light-sensor=(), midi=(), nfc=(), hid=(), serial=(), battery=(), gamepad=(), display-capture=(), idle-detection=(), screen-wake-lock=(), speaker-selection=(), xr-spatial-tracking=(), publickey-credentials-create=(), publickey-credentials-get=(), identity-credentials-get=(), window-management=(), local-fonts=(), encrypted-media=(), picture-in-picture=(), autoplay=(), document-domain=()"
 </IfModule>
