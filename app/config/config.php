@@ -16,14 +16,20 @@ $is_secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
 
 $protocol = $is_secure ? 'https' : 'http';
 
+// ── Admin app local folder name ────────────────────────────────────────────
+// Change only this constant when the admin app folder is renamed locally.
+define('LOCAL_ADMIN_FOLDER', 'lpju-sleman-test');
+
 if (strpos($http_host, 'pju.dishubsleman.id') !== false) {
     // PRODUCTION URL (Direct domain, no subfolders)
     $url = 'https://pju.dishubsleman.id';
     $adminApiBase = 'https://adminpju.dishubsleman.id';
 } else {
-    // LOCAL / NGROK URL (With subfolders)
-    $url = $protocol . '://' . $http_host . '/landingpage-siapmaju/public';
-    $adminApiBase = $protocol . '://' . $http_host . '/siap-maju/public';
+    // LOCAL / NGROK URL — base URL is derived from actual script path so it
+    // adapts automatically when this app's folder is renamed.
+    $scriptFolder = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/\\');
+    $url = $protocol . '://' . $http_host . $scriptFolder . '/public';
+    $adminApiBase = $protocol . '://' . $http_host . '/' . LOCAL_ADMIN_FOLDER . '/public';
 }
 
 define('BASEURL', rtrim($url, '/'));

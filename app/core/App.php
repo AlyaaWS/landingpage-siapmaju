@@ -96,7 +96,11 @@ class App
 
             require_once __DIR__ . '/../core/Router.php';
             $router = new Router();
-            require_once BASE_PATH . '/routes/web.php';
+            $routeFile = dirname(dirname(__DIR__)) . '/routes/web.php';
+            if (!file_exists($routeFile)) {
+                throw new \RuntimeException("Route configuration file not found at: " . $routeFile);
+            }
+            require_once $routeFile;
             $router->dispatch();
             return;
         }

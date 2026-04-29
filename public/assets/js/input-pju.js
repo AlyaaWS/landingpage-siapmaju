@@ -98,16 +98,10 @@ document.addEventListener("DOMContentLoaded", function () {
    * Build the admin detail URL (same logic as scan.js handleDecodedText)
    */
   function buildAdminUrl(secureId, type) {
-    var currentHost = window.location.hostname;
-    var baseUrl = "https://adminpju.dishubsleman.id";
-
-    if (
-      currentHost === "localhost" ||
-      currentHost === "127.0.0.1" ||
-      currentHost.includes("ngrok")
-    ) {
-      baseUrl = window.location.origin + "/siap-maju/public";
-    }
+    // Base URL injected from PHP via window.__INPUT_PJU_CONFIG__ so no folder
+    // names need to be hardcoded here.
+    var config = window.__INPUT_PJU_CONFIG__ || {};
+    var baseUrl = config.adminApiBase || "https://adminpju.dishubsleman.id";
 
     if (type === "pju") {
       return baseUrl + "/pju/detail?id=" + encodeURIComponent(secureId);

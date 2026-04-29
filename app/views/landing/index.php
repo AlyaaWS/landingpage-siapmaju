@@ -360,7 +360,8 @@ Copyright © 2026 Dinas Perhubungan Kabupaten Sleman.
     };
 
     window.__INPUT_PJU_CONFIG__ = {
-        lookupUrl: '<?= rtrim(base_url(), '/') ?>/api/lookup-pju'
+        lookupUrl: '<?= rtrim(base_url(), '/') ?>/api/lookup-pju',
+        adminApiBase: '<?= ADMIN_API_BASE ?>'
     };
 </script>
 

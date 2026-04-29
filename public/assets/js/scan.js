@@ -98,20 +98,11 @@ document.addEventListener("DOMContentLoaded", function () {
           return;
         }
 
-        // --- FIXED BASE URL LOGIC ---
-        var currentHost = window.location.hostname;
-
-        // Default target is ALWAYS the Admin server in production
-        var baseUrl = "https://adminpju.dishubsleman.id";
-
-        // Local dev fallback (points to the local admin folder)
-        if (
-          currentHost === "localhost" ||
-          currentHost === "127.0.0.1" ||
-          currentHost.includes("ngrok")
-        ) {
-          baseUrl = window.location.origin + "/siap-maju/public";
-        }
+        // Base URL injected from PHP via window.__SCAN_CONFIG__ so no folder
+        // names need to be hardcoded here.
+        var baseUrl = (window.__SCAN_CONFIG__ && window.__SCAN_CONFIG__.adminApiBase)
+          ? window.__SCAN_CONFIG__.adminApiBase
+          : "https://adminpju.dishubsleman.id";
 
         var targetUrl = "";
         if (isPJU) {

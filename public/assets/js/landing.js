@@ -641,7 +641,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Use backend-provided duration (DB: TIMESTAMPDIFF on p.tanggal -> p.waktu_selesai)
         const rawDur = d.duration;
         const durasiText = rawDur ? String(rawDur) : "durasi belum tersedia";
-        const durasiLabel = "Durasi";
+        const durasiLabel = "Durasi Perbaikan";
 
         const html = `
                     <div class="card border-0 shadow-sm">

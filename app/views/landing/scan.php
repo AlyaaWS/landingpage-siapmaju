@@ -109,6 +109,11 @@
     document.write('<script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js" integrity="sha384-hJMcc4vZxKbPwUvrjl/f7MWYnIQvANoP8ItXzz0nUy9i6D0ShaiIMj32mTZGb9kj" crossorigin="anonymous"><\/script>');
   }
 </script>
+<script>
+  window.__SCAN_CONFIG__ = {
+    adminApiBase: '<?= ADMIN_API_BASE ?>'
+  };
+</script>
 <script src="<?= base_url('assets/js/scan.js?v=' . time()) ?>"></script>
 
 </body>

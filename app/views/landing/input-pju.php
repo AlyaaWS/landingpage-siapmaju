@@ -116,7 +116,8 @@
 
 <script>
   window.__INPUT_PJU_CONFIG__ = {
-    lookupUrl: '<?= rtrim(base_url(), '/') ?>/api/lookup-pju'
+    lookupUrl: '<?= rtrim(base_url(), '/') ?>/api/lookup-pju',
+    adminApiBase: '<?= ADMIN_API_BASE ?>'
   };
 </script>
 <script src="<?= base_url('assets/js/input-pju.js?v=' . time()) ?>"></script>
