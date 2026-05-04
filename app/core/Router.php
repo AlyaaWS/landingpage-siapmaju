@@ -55,14 +55,7 @@ class Router
         $route = $this->routes[$method][$path] ?? null;
 
         if (!$route) {
-            http_response_code(404);
-            // Return JSON for API routes so frontend fetch() can parse it
-            if (str_starts_with($path, '/api/')) {
-                header('Content-Type: application/json; charset=utf-8');
-                echo json_encode(['status' => false, 'message' => 'API endpoint tidak ditemukan.']);
-            } else {
-                echo "404 - Route not found: " . htmlspecialchars($path);
-            }
+            render_error_page(404);
             return;
         }
 
@@ -82,25 +75,20 @@ class Router
             $this->loadControllerIfNeeded($controller);
 
             if (!class_exists($controller)) {
-                http_response_code(500);
-                echo "Controller tidak ditemukan: " . htmlspecialchars($controller);
-                return;
+                throw new RuntimeException('Controller route tidak ditemukan.');
             }
 
             $obj = new $controller();
 
             if (!method_exists($obj, $action)) {
-                http_response_code(500);
-                echo "Method tidak ditemukan: " . htmlspecialchars($controller . '@' . $action);
-                return;
+                throw new RuntimeException('Method route tidak ditemukan.');
             }
 
             $obj->$action();
             return;
         }
 
-        http_response_code(500);
-        echo "Handler route tidak valid.";
+        throw new RuntimeException('Handler route tidak valid.');
     }
 
     private function runMiddlewares(array $middlewares): void
@@ -119,9 +107,7 @@ class Router
                     continue;
                 }
 
-                http_response_code(500);
-                echo "Middleware class tidak punya method yang dibutuhkan.";
-                exit;
+                throw new RuntimeException('Middleware class tidak punya method yang dibutuhkan.');
             }
 
             if (is_string($mw) && class_exists($mw) && method_exists($mw, 'handle')) {
@@ -134,9 +120,7 @@ class Router
                 continue;
             }
 
-            http_response_code(500);
-            echo "Middleware tidak valid.";
-            exit;
+            throw new RuntimeException('Middleware tidak valid.');
         }
     }
 

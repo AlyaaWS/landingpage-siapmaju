@@ -2,7 +2,7 @@
 
 class LandingController extends Controller {
     
-    public function index() {
+    public function inde() {
         
         $dashboard = $this->model('DashboardModel');
 

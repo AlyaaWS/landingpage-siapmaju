@@ -33,19 +33,10 @@ class App
         // subsequent code can rely on the constants being defined.
         require_once __DIR__ . '/../config/config.php';
 
-        // ── Error reporting ───────────────────────────────────────────────────
-        // Production: define APP_ENV = 'production' in config.php to silence
-        // all error output to end-users. Errors are still written to the
-        // server log via error_log() so nothing is lost.
-        // Development (default): display all errors as normal.
-        if (defined('APP_ENV') && APP_ENV === 'production') {
-            ini_set('display_errors', '0');
-            ini_set('log_errors', '1');
-            error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
-        } else {
-            ini_set('display_errors', '1');
-            error_reporting(E_ALL);
-        }
+        ini_set('display_errors', '0');
+        ini_set('display_startup_errors', '0');
+        ini_set('log_errors', '1');
+        error_reporting(E_ALL);
 
         if (session_status() === PHP_SESSION_NONE) {
             $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -146,8 +137,7 @@ class App
         }
 
         // 6. Jika tidak ada yang cocok, baru tampilkan 404
-        http_response_code(404);
-        echo "404 - Halaman Tidak Ditemukan. Pastikan nama Controller sesuai dengan URL.";
+        render_error_page(404);
     }
 }
 
