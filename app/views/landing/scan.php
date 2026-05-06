@@ -54,6 +54,134 @@
   .scan-info {
     color: #1a237e; /* text-dark-blue theme */
   }
+
+  .qr-alert-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1055;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: rgba(3, 12, 30, .62);
+    backdrop-filter: blur(8px);
+  }
+
+  .qr-alert-overlay.is-open {
+    display: flex;
+  }
+
+  .qr-alert-modal {
+    width: 100%;
+    max-width: 390px;
+    border-radius: 32px;
+    background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .5), 0 0 0 4px rgba(255, 255, 255, .08);
+    border: 1.5px solid rgba(0, 70, 199, .55);
+    padding: 34px 24px 24px;
+    text-align: center;
+  }
+
+  .qr-alert-icon {
+    width: 92px;
+    height: 92px;
+    margin: 0 auto 24px;
+    border-radius: 28px;
+    display: grid;
+    place-items: center;
+    position: relative;
+    background: linear-gradient(145deg, #0046c7, #062d91);
+    box-shadow: 0 18px 38px rgba(0, 70, 199, .28);
+    font-size: 2.5rem;
+    color: #fff;
+  }
+
+  .qr-alert-icon::after {
+    content: '!';
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #f7b500;
+    color: #061a3d;
+    border: 4px solid #fff;
+    font-size: 1rem;
+    font-weight: 800;
+  }
+
+  .qr-alert-title {
+    margin: 0 0 12px;
+    font-size: 27px;
+    line-height: 1.2;
+    font-weight: 900;
+    letter-spacing: -.05em;
+    color: #061a3d;
+  }
+
+  .qr-alert-title span {
+    color: #0046c7;
+  }
+
+  .qr-alert-message {
+    max-width: 290px;
+    margin: 0 auto 22px;
+    color: #334155;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .qr-alert-info {
+    margin-bottom: 20px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    background: #eaf2ff;
+    border: 1px solid rgba(0, 70, 199, .16);
+    color: #14346c;
+  }
+
+  .qr-alert-info p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+
+  .qr-alert-actions {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+  }
+
+  .qr-alert-actions .btn {
+    width: 100%;
+    border-radius: 18px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  .btn-qr-retry {
+    color: #fff;
+    border: 0;
+    background: linear-gradient(135deg, #006cff, #0037b8);
+    box-shadow: 0 14px 30px rgba(0, 70, 199, .28), inset 0 1px 0 rgba(255,255,255,.28);
+  }
+
+  .btn-qr-close {
+    color: #334155;
+    border: 1px solid #d7e1f4;
+    background: #f8fafc;
+  }
+
+  @media (max-width: 575.98px) {
+    .qr-alert-overlay {
+      padding: 1rem;
+    }
+  }
 </style>
 </head>
 <body>
@@ -101,6 +229,21 @@
 </section>
 
 <footer class="mt-4"></footer>
+
+<div id="qr-unknown-modal" class="qr-alert-overlay" aria-hidden="true">
+  <section class="qr-alert-modal" role="dialog" aria-modal="true" aria-labelledby="qr-unknown-title">
+    <div class="qr-alert-icon"><i class="fa-solid fa-qrcode"></i></div>
+    <h2 id="qr-unknown-title" class="qr-alert-title">Data PJU <span>tidak ditemukan</span></h2>
+    <p class="qr-alert-message">QR Code yang Anda scan tidak sesuai dengan data PJU.</p>
+    <div class="qr-alert-info">
+      <p>Silahkan hubungi petugas Dishub untuk verifikasi lebih lanjut.</p>
+    </div>
+    <div class="qr-alert-actions">
+      <button type="button" id="btn-qr-retry" class="btn btn-qr-retry">Scan Ulang</button>
+      <button type="button" id="btn-qr-close" class="btn btn-qr-close">Tutup</button>
+    </div>
+  </section>
+</div>
 
 <!-- libs: primary CDN + fallback if primary fails -->
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.7/html5-qrcode.min.js" integrity="sha384-hJMcc4vZxKbPwUvrjl/f7MWYnIQvANoP8ItXzz0nUy9i6D0ShaiIMj32mTZGb9kj" crossorigin="anonymous"></script>

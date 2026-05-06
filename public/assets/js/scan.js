@@ -21,6 +21,9 @@ document.addEventListener("DOMContentLoaded", function () {
   if (typeof Html5Qrcode === "undefined") return;
 
   const uploadFallback = document.getElementById("upload-fallback");
+  const unknownQrModal = document.getElementById("qr-unknown-modal");
+  const retryUnknownQrBtn = document.getElementById("btn-qr-retry");
+  const closeUnknownQrBtn = document.getElementById("btn-qr-close");
 
   // ─── Console-only logger (no DOM output) ───
   function logToScreen(message, level) {
@@ -64,6 +67,30 @@ document.addEventListener("DOMContentLoaded", function () {
   // ─── Scanner instance ───
   var scanner = null;
 
+  function hideUnknownQrModal() {
+    if (!unknownQrModal) return;
+    unknownQrModal.classList.remove("is-open");
+    unknownQrModal.setAttribute("aria-hidden", "true");
+  }
+
+  function showUnknownQrModal(decodedText) {
+    if (!unknownQrModal) {
+      alert("QR Code tidak dikenali oleh sistem:\n" + decodedText);
+      return;
+    }
+
+    unknownQrModal.classList.add("is-open");
+    unknownQrModal.setAttribute("aria-hidden", "false");
+  }
+
+  function restartScanner() {
+    hideUnknownQrModal();
+    if (uploadResult) {
+      uploadResult.innerHTML = "";
+    }
+    attemptCamera();
+  }
+
   // ─── WhatsApp URL interceptor ───
   // Intercepts wa.me links, extracts the ID, and redirects to local detail page.
   // ─── WhatsApp URL interceptor ───
@@ -94,15 +121,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         if (!secureId) {
-          alert("Format QR tidak valid. Teks: " + fullText);
+          showUnknownQrModal(fullText);
           return;
         }
 
         // Base URL injected from PHP via window.__SCAN_CONFIG__ so no folder
         // names need to be hardcoded here.
-        var baseUrl = (window.__SCAN_CONFIG__ && window.__SCAN_CONFIG__.adminApiBase)
-          ? window.__SCAN_CONFIG__.adminApiBase
-          : "https://adminpju.dishubsleman.id";
+        var baseUrl =
+          window.__SCAN_CONFIG__ && window.__SCAN_CONFIG__.adminApiBase
+            ? window.__SCAN_CONFIG__.adminApiBase
+            : "https://adminpju.dishubsleman.id";
 
         var targetUrl = "";
         if (isPJU) {
@@ -133,7 +161,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      alert("QR Code tidak dikenali oleh sistem:\n" + decodedText);
+      showUnknownQrModal(decodedText);
     } catch (e) {
       alert("Terjadi kesalahan sistem: " + e);
     }
@@ -361,6 +389,26 @@ document.addEventListener("DOMContentLoaded", function () {
           }
           fileInput.value = "";
         });
+    });
+  }
+
+  if (retryUnknownQrBtn) {
+    retryUnknownQrBtn.addEventListener("click", function () {
+      restartScanner();
+    });
+  }
+
+  if (closeUnknownQrBtn) {
+    closeUnknownQrBtn.addEventListener("click", function () {
+      restartScanner();
+    });
+  }
+
+  if (unknownQrModal) {
+    unknownQrModal.addEventListener("click", function (event) {
+      if (event.target === unknownQrModal) {
+        restartScanner();
+      }
     });
   }
 
