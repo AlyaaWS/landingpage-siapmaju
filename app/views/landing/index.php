@@ -244,7 +244,7 @@
 Address: Dinas Perhubungan Sleman, Yogyakarta
 </p>
 
-<p>Tel: 0821 7826 7737</p>
+<p>Tel: 0813 9040 7009</p>
 
 <p>Email: dishub@sleman.go.id</p>
 
