@@ -245,18 +245,12 @@
   </section>
 </div>
 
-<!-- libs: primary CDN + fallback if primary fails -->
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.7/html5-qrcode.min.js" integrity="sha384-hJMcc4vZxKbPwUvrjl/f7MWYnIQvANoP8ItXzz0nUy9i6D0ShaiIMj32mTZGb9kj" crossorigin="anonymous"></script>
-<script>
-  if (typeof Html5Qrcode === 'undefined') {
-    document.write('<script src="https://unpkg.com/html5-qrcode@2.3.7/html5-qrcode.min.js" integrity="sha384-hJMcc4vZxKbPwUvrjl/f7MWYnIQvANoP8ItXzz0nUy9i6D0ShaiIMj32mTZGb9kj" crossorigin="anonymous"><\/script>');
-  }
-</script>
-<script>
-  window.__SCAN_CONFIG__ = {
-    adminApiBase: '<?= ADMIN_API_BASE ?>'
-  };
-</script>
+<div id="scanConfig" style="display:none;" data-scanconfig="<?= htmlspecialchars(json_encode([
+    'adminApiBase' => ADMIN_API_BASE
+]), ENT_QUOTES, 'UTF-8') ?>"></div>
+<script src="<?= base_url('assets/js/init-config.js?v=20260731') ?>"></script>
+<script src="<?= base_url('assets/js/scan-fallback.js?v=20260731') ?>"></script>
 <script src="<?= base_url('assets/js/scan.js?v=' . time()) ?>"></script>
 
 </body>

@@ -34,7 +34,7 @@
 
     # Balanced CSP: Allows inline scripts/styles for UI functionality but restricts objects and iframes
     # Note: connect-src explicitly allows calls to the Admin API
-    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; img-src 'self' data: https: blob:; connect-src 'self' https://adminpju.dishubsleman.id https:; object-src 'none'; base-uri 'none'; frame-ancestors 'none';"
+    Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com data:; img-src 'self' data: blob: https://cdn.jsdelivr.net; connect-src 'self' https://adminpju.dishubsleman.id; object-src 'none'; base-uri 'none'; frame-ancestors 'none';"
 
     # Permissions-Policy: allow only camera (QR scanner) and fullscreen (Html5Qrcode mobile UI).
     # All other sensitive hardware/browser APIs are explicitly denied.

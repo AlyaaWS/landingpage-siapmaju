@@ -20,7 +20,7 @@ $is_secure = (
 $protocol = $is_secure ? 'https' : 'http';
 
 // ── Admin app local folder name ────────────────────────────────────────────
-define('LOCAL_ADMIN_FOLDER', 'lpju-sleman-test');
+define('LOCAL_ADMIN_FOLDER', 'siap-maju');
 
 // =======================
 // Production
@@ -35,15 +35,15 @@ if (strpos($http_host, 'pju.dishubsleman.id') !== false) {
 // =======================
 } elseif (strpos($http_host, 'devlaporpju.slemankab.go.id') !== false) {
 
-    $url = $protocol . '://' . $http_host;
-    $adminApiBase = 'http://devadminlaporpju.slemankab.go.id';
+    $url = 'https://' . $http_host;
+    $adminApiBase = 'https://devadminlaporpju.slemankab.go.id';
 
 // =======================
 // Local Development
 // =======================
 } else {
 
-    $scriptFolder = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/\\');
+    $scriptFolder = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
 
     $url = $protocol . '://' . $http_host . $scriptFolder;
 

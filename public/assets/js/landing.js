@@ -643,6 +643,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const durasiText = rawDur ? String(rawDur) : "durasi belum tersedia";
         const durasiLabel = "Durasi Perbaikan";
 
+        // Compute Jml. Digunakan from komponen (Komp. Digunakan)
+        const rawKomponen = d.komponen || "";
+        let jmlDigunakan = "-";
+        if (rawKomponen.trim() !== "") {
+          jmlDigunakan = rawKomponen.split(',').filter(x => x.trim() !== "").length;
+        }
+
         const html = `
                     <div class="card border-0 shadow-sm">
                       <div class="card-body">
@@ -652,7 +659,15 @@ document.addEventListener("DOMContentLoaded", function () {
                         </div>
                         <div class="mb-2"><i class="fa-solid fa-location-dot text-muted me-2"></i> ${escapeHTML(d.lokasi || "-")}</div>
                         <div class="mb-2"><i class="fa-solid fa-calendar-alt text-muted me-2"></i> ${escapeHTML(d.tanggal || "-")}</div>
-                        <div class="mb-0"><span class="text-muted small">${durasiLabel}:</span> <span class="text-body">${escapeHTML(durasiText)}</span></div>
+                        
+                        <div class="mt-3 pt-2 border-top mb-0"><span class="text-muted small">${durasiLabel}:</span> <span class="text-body fw-medium">${escapeHTML(durasiText)}</span></div>
+                        
+                        <div class="mt-3 pt-2 border-top">
+                          <div class="mb-1"><span class="text-muted small">Jenis:</span> <span class="text-body">${escapeHTML(d.jenis_perbaikan || "-")}</span></div>
+                          <div class="mb-1"><span class="text-muted small">Komp. Rusak:</span> <span class="text-body">${escapeHTML(d.komponen_rusak || "-")}</span></div>
+                          <div class="mb-1"><span class="text-muted small">Komp. Digunakan:</span> <span class="text-body">${escapeHTML(d.komponen || "-")}</span></div>
+                          <div class="mb-1"><span class="text-muted small">Jml. Digunakan:</span> <span class="text-body">${escapeHTML(String(jmlDigunakan))}</span></div>
+                        </div>
                       </div>
                     </div>
                 `;

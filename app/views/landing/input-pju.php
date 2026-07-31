@@ -114,12 +114,11 @@
 
 <footer class="mt-4"></footer>
 
-<script>
-  window.__INPUT_PJU_CONFIG__ = {
-    lookupUrl: '<?= rtrim(base_url(), '/') ?>/api/lookup-pju',
-    adminApiBase: '<?= ADMIN_API_BASE ?>'
-  };
-</script>
+<div id="inputPjuConfig" style="display:none;" data-inputconfig="<?= htmlspecialchars(json_encode([
+    'lookupUrl' => rtrim(base_url(), '/') . '/api/lookup-pju',
+    'adminApiBase' => ADMIN_API_BASE
+]), ENT_QUOTES, 'UTF-8') ?>"></div>
+<script src="<?= base_url('assets/js/init-config.js?v=20260731') ?>"></script>
 <script src="<?= base_url('assets/js/input-pju.js?v=' . time()) ?>"></script>
 
 </body>

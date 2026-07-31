@@ -344,29 +344,25 @@ Copyright © 2026 Dinas Perhubungan Kabupaten Sleman.
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
-<script>
-    // Pass PHP data to global JS object safely using the exact variables returned by DashboardModel
-    window.__DASHBOARD_DATA__ = {
-        summary: {
-            total_lpju: <?= $barData[0] ?? 0 ?>,
-            total_daya: <?= $barData[1] ?? 0 ?> 
-        },
-        doughnutLabels: <?= json_encode($doughnutLabels ?? []) ?>,
-        doughnutData: <?= json_encode($doughnutData ?? []) ?>,
-        pieLabels: <?= json_encode($pieLabels ?? []) ?>,
-        pieData: <?= json_encode($pieData ?? []) ?>,
-        // FIXED: Using rtrim to ensure a clean, absolute base path without double slashes
-        apiCekStatusUrl: '<?= rtrim(base_url(), '/') ?>/api/cek-status'
-    };
+<div id="landingConfig" style="display:none;" data-dashboard="<?= htmlspecialchars(json_encode([
+    'summary' => [
+        'total_lpju' => $barData[0] ?? 0,
+        'total_daya' => $barData[1] ?? 0
+    ],
+    'doughnutLabels' => $doughnutLabels ?? [],
+    'doughnutData' => $doughnutData ?? [],
+    'pieLabels' => $pieLabels ?? [],
+    'pieData' => $pieData ?? [],
+    'apiCekStatusUrl' => rtrim(base_url(), '/') . '/api/cek-status'
+]), ENT_QUOTES, 'UTF-8') ?>"></div>
+<div id="inputPjuConfig" style="display:none;" data-inputconfig="<?= htmlspecialchars(json_encode([
+    'lookupUrl' => rtrim(base_url(), '/') . '/api/lookup-pju',
+    'adminApiBase' => ADMIN_API_BASE
+]), ENT_QUOTES, 'UTF-8') ?>"></div>
+<script src="<?= base_url('assets/js/init-config.js?v=20260731') ?>"></script>
 
-    window.__INPUT_PJU_CONFIG__ = {
-        lookupUrl: '<?= rtrim(base_url(), '/') ?>/api/lookup-pju',
-        adminApiBase: '<?= ADMIN_API_BASE ?>'
-    };
-</script>
-
-<script src="<?= base_url('assets/js/landing.js?v=' . time()) ?>"></script>
-<script src="<?= base_url('assets/js/input-pju.js?v=' . time()) ?>"></script>
+<script src="<?= base_url('assets/js/landing.js?v=20260730_v2') ?>"></script>
+<script src="<?= base_url('assets/js/input-pju.js?v=20260730_v2') ?>"></script>
 
 </body>
 </html>
