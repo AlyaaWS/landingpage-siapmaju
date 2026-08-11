@@ -39,8 +39,11 @@ class App
         error_reporting(E_ALL);
 
         if (session_status() === PHP_SESSION_NONE) {
-            $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                     || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+            // Force Secure Cookie, kecuali untuk lingkungan pengembangan lokal (HTTP)
+            $isSecure = true;
+            if (isset($_SERVER['SERVER_NAME']) && in_array($_SERVER['SERVER_NAME'], ['localhost', '127.0.0.1'])) {
+                $isSecure = false;
+            }
 
             session_set_cookie_params([
                 'lifetime' => 0,
@@ -52,6 +55,21 @@ class App
             ]);
 
             session_start();
+        }
+
+        // ── Security Headers untuk Seluruh Respons (HTML & API) ──────────────
+        if (!headers_sent()) {
+            header("X-Frame-Options: DENY"); // Memblokir embedding via iframe
+            header("X-Content-Type-Options: nosniff");
+            header("Referrer-Policy: strict-origin-when-cross-origin");
+            header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
+            header("Permissions-Policy: geolocation=(), camera=(), microphone=()");
+            // CSP Permissive: mengizinkan inline scripts/styles dan evaluasi, tetapi mencegah injeksi dari domain tidak dikenal.
+            header("Content-Security-Policy: default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'none'");
+            
+            // Mencoba menghapus identitas server bawaan PHP
+            header_remove('X-Powered-By');
+            header_remove('Server');
         }
 
         require_once __DIR__ . '/../helpers/url.php';
@@ -75,9 +93,21 @@ class App
         $rawUrl = $_GET['url'] ?? '';
         if (str_starts_with(trim($rawUrl, '/'), 'api')) {
             // ── CORS headers for all API responses ───────────────────────
-            header('Access-Control-Allow-Origin: *');
+            $allowed_origins = [
+                'https://pju.dishubsleman.id',
+                'http://adminpju.dishubsleman.id',
+                'http://localhost'
+            ];
+            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+            
+            if (in_array($origin, $allowed_origins, true)) {
+                header('Access-Control-Allow-Origin: ' . $origin);
+                header('Access-Control-Allow-Credentials: true');
+                header('Vary: Origin');
+            }
+            
             header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-            header('Access-Control-Allow-Headers: Content-Type');
+            header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
             // Handle preflight OPTIONS requests
             if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -119,14 +149,26 @@ class App
                 $controllerInstance = new $controllerClass();
 
                 // 4. Cari Method yang diminta (bisa di $url[1] atau $url[0] jika Controller pakai Default)
-                // Ini penting agar URL "/scan" bisa masuk ke LandingController->scan()
-                $potentialMethod = $url[1] ?? ($url[0] ?? null);
+                $potentialMethodRaw = $url[1] ?? ($url[0] ?? null);
+                
+                // Convert dash format to camelCase for method checking (e.g. input-pju -> inputPju)
+                $potentialMethod = $potentialMethodRaw ? lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $potentialMethodRaw)))) : null;
 
                 if ($potentialMethod && method_exists($controllerInstance, $potentialMethod)) {
                     $methodName = $potentialMethod;
                     // Bersihkan array parameter
                     if (isset($url[1])) { unset($url[1]); }
                     elseif (isset($url[0])) { unset($url[0]); }
+                } else {
+                    // Jika method tidak ditemukan, batasi SPA fallback hanya untuk rute yang dikenali.
+                    // Jika ada segmen URL tapi tidak valid, lemparkan 404.
+                    if (isset($url[0]) && $url[0] !== '') {
+                        $validSpaRoutes = ['scan', 'input-pju']; // Daftar rute SPA yang diizinkan (dari web.php)
+                        if ($controllerName !== 'Landing' || !in_array(strtolower($url[0]), $validSpaRoutes)) {
+                            render_error_page(404);
+                            return;
+                        }
+                    }
                 }
 
                 // 5. Jalankan Class dan Method beserta sisa parameternya
