@@ -94,9 +94,16 @@ class App
         if (str_starts_with(trim($rawUrl, '/'), 'api')) {
             // ── CORS headers for all API responses ───────────────────────
             $allowed_origins = [
+                'http://pju.dishubsleman.id',
                 'https://pju.dishubsleman.id',
                 'http://adminpju.dishubsleman.id',
-                'http://localhost'
+                'https://adminpju.dishubsleman.id',
+                'http://devlaporpju.slemankab.go.id',
+                'https://devlaporpju.slemankab.go.id',
+                'http://devadminlaporpju.slemankab.go.id',
+                'https://devadminlaporpju.slemankab.go.id',
+                'http://localhost',
+                'http://127.0.0.1'
             ];
             $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
             

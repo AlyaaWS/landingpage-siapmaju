@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var hint = "";
     if (name === "NotAllowedError") {
       hint =
-        "Browser menolak akses kamera. Periksa izin kamera di pengaturan browser & pastikan halaman dibuka lewat HTTPS atau localhost.";
+        "Browser menolak akses kamera. Periksa izin kamera di pengaturan browser & pastikan halaman dibuka lewat HTTPS.";
     } else if (name === "NotFoundError") {
       hint =
         "Tidak ditemukan perangkat kamera. Pastikan perangkat memiliki kamera yang aktif.";
@@ -223,11 +223,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       logToScreen(
-        "navigator.mediaDevices TIDAK tersedia. Halaman harus diakses via HTTPS atau localhost.",
+        "navigator.mediaDevices TIDAK tersedia. Halaman harus diakses via HTTPS .",
         "error",
       );
       readerEl.innerHTML =
-        '<div class="text-danger p-3">Browser tidak mendukung akses kamera pada origin ini. Gunakan HTTPS atau localhost.</div>';
+        '<div class="text-danger p-3">Browser tidak mendukung akses kamera pada origin ini. Gunakan HTTPS .</div>';
       showUploadFallback();
       return;
     }
