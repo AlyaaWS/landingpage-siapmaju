@@ -65,8 +65,8 @@ class App
             header("Strict-Transport-Security: max-age=31536000");
         }
         
-        // Minimal permissive CSP to prevent breaking existing functionality
-        header("Content-Security-Policy: default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';");
+        // Tighter CSP without unsafe-eval
+        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://devlaporpju.slemankab.go.id https://pju.dishubsleman.id https://devadminlaporpju.slemankab.go.id https://adminpju.dishubsleman.id;");
 
         require_once __DIR__ . '/../helpers/url.php';
         require_once __DIR__ . '/../helpers/csrf.php';
