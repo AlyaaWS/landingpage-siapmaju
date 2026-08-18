@@ -40,6 +40,7 @@ class App
 
         if (session_status() === PHP_SESSION_NONE) {
             $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                     || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
                      || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
             session_set_cookie_params([
@@ -53,6 +54,19 @@ class App
 
             session_start();
         }
+
+        // ── Security Headers (HIGH-01) ───────────────────────────────────
+        header("X-Content-Type-Options: nosniff");
+        header("X-Frame-Options: SAMEORIGIN");
+        header("Referrer-Policy: strict-origin-when-cross-origin");
+        header("Permissions-Policy: camera=(), microphone=(), geolocation=()");
+        
+        if (!empty($isSecure)) {
+            header("Strict-Transport-Security: max-age=31536000");
+        }
+        
+        // Minimal permissive CSP to prevent breaking existing functionality
+        header("Content-Security-Policy: default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';");
 
         require_once __DIR__ . '/../helpers/url.php';
         require_once __DIR__ . '/../helpers/csrf.php';
@@ -75,9 +89,29 @@ class App
         $rawUrl = $_GET['url'] ?? '';
         if (str_starts_with(trim($rawUrl, '/'), 'api')) {
             // ── CORS headers for all API responses ───────────────────────
-            header('Access-Control-Allow-Origin: *');
+            $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+            $allowedOrigins = [
+                defined('APP_URL') ? APP_URL : '',
+                defined('ADMIN_API_BASE') ? ADMIN_API_BASE : '',
+                'https://devlaporpju.slemankab.go.id',
+                'https://pju.dishubsleman.id',
+                'https://devadminlaporpju.slemankab.go.id',
+                'https://adminpju.dishubsleman.id'
+            ];
+            
+            // Allow local dev origins
+            if (strpos($origin, 'http://localhost') === 0 || strpos($origin, 'http://127.0.0.1') === 0) {
+                $allowedOrigins[] = $origin;
+            }
+
+            if (!empty($origin) && in_array($origin, $allowedOrigins)) {
+                header('Access-Control-Allow-Origin: ' . $origin);
+                header('Access-Control-Allow-Credentials: true');
+                header('Vary: Origin');
+            }
+            
             header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-            header('Access-Control-Allow-Headers: Content-Type');
+            header('Access-Control-Allow-Headers: Content-Type, Accept, Accept-Encoding, Accept-Language, Cache-Control, Connection, Content-Length, Host, Origin, Pragma, Referer, X-Requested-With, Request-Method, Request-From, Request-Type, Request-Id, Request-Index, User-Agent, Caller-Id, Request-Method-Index, Request-Session-Index, Request-Session, Request-Session-Type, Akses-Agent, Akses-Ip');
 
             // Handle preflight OPTIONS requests
             if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
