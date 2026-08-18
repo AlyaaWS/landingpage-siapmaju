@@ -43,6 +43,12 @@ class App
                      || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
                      || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
+            // Code-only approach fallback: If Nginx doesn't pass HTTPS headers,
+            // we rely on the application config which defines APP_URL with https:// for production.
+            if (!$isSecure && defined('APP_URL') && strpos(APP_URL, 'https://') === 0) {
+                $isSecure = true;
+            }
+
             session_set_cookie_params([
                 'lifetime' => 0,
                 'path'     => '/',
