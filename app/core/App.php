@@ -62,21 +62,22 @@ class App
         }
 
         // ── Security Headers (HIGH-01) ───────────────────────────────────
-        header("X-Content-Type-Options: nosniff");
-        header("X-Frame-Options: SAMEORIGIN");
-        header("Referrer-Policy: strict-origin-when-cross-origin");
-        header("Permissions-Policy: camera=(), microphone=(), geolocation=()");
-        
-        if (!empty($isSecure)) {
-            header("Strict-Transport-Security: max-age=31536000");
+        if (!headers_sent()) {
+            header("X-Content-Type-Options: nosniff");
+            header("X-Frame-Options: SAMEORIGIN");
+            header("Referrer-Policy: strict-origin-when-cross-origin");
+            header("Permissions-Policy: camera=(), microphone=(), geolocation=()");
+            
+            if (!empty($isSecure)) {
+                header("Strict-Transport-Security: max-age=31536000");
+            }
+            
+            // Tighter CSP without unsafe-eval
+            header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://devlaporpju.slemankab.go.id https://pju.dishubsleman.id https://devadminlaporpju.slemankab.go.id https://adminpju.dishubsleman.id;");
+            
+            // Remove PHP identity headers
+            header_remove('X-Powered-By');
         }
-        
-        header("X-Debug-APP_URL: " . (defined('APP_URL') ? APP_URL : 'NOT_DEFINED'));
-        header("X-Debug-isSecure: " . (!empty($isSecure) ? 'TRUE' : 'FALSE'));
-        header("X-Debug-HTTP_HOST: " . ($_SERVER['HTTP_HOST'] ?? 'NONE'));
-
-        // Tighter CSP without unsafe-eval
-        header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://devlaporpju.slemankab.go.id https://pju.dishubsleman.id https://devadminlaporpju.slemankab.go.id https://adminpju.dishubsleman.id;");
 
         require_once __DIR__ . '/../helpers/url.php';
         require_once __DIR__ . '/../helpers/csrf.php';
@@ -137,4 +138,3 @@ class App
         $router->dispatch();
     }
 }
-
