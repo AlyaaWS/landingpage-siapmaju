@@ -71,6 +71,10 @@ class App
             header("Strict-Transport-Security: max-age=31536000");
         }
         
+        header("X-Debug-APP_URL: " . (defined('APP_URL') ? APP_URL : 'NOT_DEFINED'));
+        header("X-Debug-isSecure: " . (!empty($isSecure) ? 'TRUE' : 'FALSE'));
+        header("X-Debug-HTTP_HOST: " . ($_SERVER['HTTP_HOST'] ?? 'NONE'));
+
         // Tighter CSP without unsafe-eval
         header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src 'self' data: https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://devlaporpju.slemankab.go.id https://pju.dishubsleman.id https://devadminlaporpju.slemankab.go.id https://adminpju.dishubsleman.id;");
 
