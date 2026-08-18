@@ -89,16 +89,12 @@ class App
         return explode('/', $url);
     }
 
-   public function run()
+    public function run()
     {
-        $url = $this->parseUrl();
-
-        // ── API routes: delegate to Router (routes/web.php) ──────────────
-        // URL segments starting with "api" are handled by the explicit Router
-        // so we can use clean route definitions like /api/lookup-pju.
         $rawUrl = $_GET['url'] ?? '';
+
+        // ── CORS headers only for API responses ───────────────────────────
         if (str_starts_with(trim($rawUrl, '/'), 'api')) {
-            // ── CORS headers for all API responses ───────────────────────
             $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
             $allowedOrigins = [
                 defined('APP_URL') ? APP_URL : '',
@@ -128,60 +124,17 @@ class App
                 http_response_code(204);
                 return;
             }
-
-            require_once __DIR__ . '/../core/Router.php';
-            $router = new Router();
-            $routeFile = dirname(dirname(__DIR__)) . '/routes/web.php';
-            if (!file_exists($routeFile)) {
-                throw new \RuntimeException("Route configuration file not found at: " . $routeFile);
-            }
-            require_once $routeFile;
-            $router->dispatch();
-            return;
         }
 
-        // 1. Set Default Controller & Method
-        $controllerName = 'Landing'; // <-- Controller utama jika URL kosong
-        $methodName = 'index';       // <-- Method utama jika tidak disebutkan
-
-        // 2. Cek apakah index [0] dari URL adalah Controller yang valid
-        if (isset($url[0])) {
-            $potentialController = ucfirst(strtolower($url[0])); // Standar Linux (Huruf depan besar)
-            if (file_exists(__DIR__ . '/../controllers/' . $potentialController . 'Controller.php')) {
-                $controllerName = $potentialController;
-                unset($url[0]); // Hapus dari array URL jika cocok sebagai Controller
-            }
+        // ── Dispatch all requests through the Router ─────────────────────
+        require_once __DIR__ . '/../core/Router.php';
+        $router = new Router();
+        $routeFile = dirname(dirname(__DIR__)) . '/routes/web.php';
+        if (!file_exists($routeFile)) {
+            throw new \RuntimeException("Route configuration file not found at: " . $routeFile);
         }
-
-        // 3. Muat file Controller
-        $controllerFile = __DIR__ . '/../controllers/' . $controllerName . 'Controller.php';
-        if (file_exists($controllerFile)) {
-            require_once $controllerFile;
-            $controllerClass = $controllerName . 'Controller';
-
-            if (class_exists($controllerClass)) {
-                $controllerInstance = new $controllerClass();
-
-                // 4. Cari Method yang diminta (bisa di $url[1] atau $url[0] jika Controller pakai Default)
-                // Ini penting agar URL "/scan" bisa masuk ke LandingController->scan()
-                $potentialMethod = $url[1] ?? ($url[0] ?? null);
-
-                if ($potentialMethod && method_exists($controllerInstance, $potentialMethod)) {
-                    $methodName = $potentialMethod;
-                    // Bersihkan array parameter
-                    if (isset($url[1])) { unset($url[1]); }
-                    elseif (isset($url[0])) { unset($url[0]); }
-                }
-
-                // 5. Jalankan Class dan Method beserta sisa parameternya
-                $params = $url ? array_values($url) : [];
-                call_user_func_array([$controllerInstance, $methodName], $params);
-                return; // Selesai
-            }
-        }
-
-        // 6. Jika tidak ada yang cocok, baru tampilkan 404
-        render_error_page(404);
+        require_once $routeFile;
+        $router->dispatch();
     }
 }
 
